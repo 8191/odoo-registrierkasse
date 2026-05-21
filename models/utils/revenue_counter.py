@@ -1,0 +1,113 @@
+import unittest
+from base64 import b64decode, b64encode
+from hashlib import sha256
+import os
+
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
+
+def encrypt_revenue_counter(revenue_counter: float, aes_key, pos_name, sequence_number):
+    cipher = Cipher(algorithms.AES(b64decode(aes_key)), _init_vector(pos_name, sequence_number))
+    encryptor = cipher.encryptor()
+
+    revenue_counter_cents = round(revenue_counter * 100)
+
+    # According to the detailed Specification, the length of a block needs to be 16 Bytes.
+    # However for the qr code it needs to be 5 bytes. So the first 5 bytes of the revenue counter are filled
+    data = revenue_counter_cents.to_bytes(5, byteorder='big', signed=True) + b'\x00' * 11
+
+    encrypted = (encryptor.update(data) + encryptor.finalize())[:5]
+    return b64encode(encrypted).decode('utf-8')
+
+
+def _init_vector(pos_name, bill_number):
+    return modes.CTR(sha256(_init_vector_string(pos_name, bill_number).encode('utf-8')).digest()[:16])
+
+
+def _init_vector_string(pos_name, bill_number):
+    return pos_name + str(bill_number)
+
+def generate_aes_key():
+    key = os.urandom(32)
+    return b64encode(key).decode('utf-8')
+
+def generate_aes_checksum(aes_key: str):
+    hash = sha256(aes_key.encode("utf-8")).digest()
+    return b64encode(hash[:3]).decode('utf-8').rstrip("=")
+
+class PosUtilsTest(unittest.TestCase):
+    AES_KEY = "yrv/OHCvvATh6P64DOBpdAXc97ZhBP9FyB/NPmrfRI4="
+
+    def test_init_vector_string(self):
+        self.assertEqual(_init_vector_string('DEMO-CASH-BOX524', 1),
+                          'DEMO-CASH-BOX5241',
+                          "Init vector string")
+
+    def test_revenue_counter(self):
+        self.assertEqual(encrypt_revenue_counter(0.0,
+                                                 "mWSdfdY96cjlFE5+eKCzcXinWuBzhJvmMJ60QRvBJLI=",
+                                                 "demokasse42",
+                                                 1),
+                         'zCuys3Y=',
+                         "Revenue counter 0")
+
+    def test_decrypt_revenue_counter_zero(self):
+        encrypted = b64decode(encrypt_revenue_counter(0.0,
+                                                      self.AES_KEY,
+                                                      "DEMO-CASH-BOX",
+                                                      1))
+        decrypted = self._decrypt(self.AES_KEY, encrypted, "DEMO-CASH-BOX",
+                                  1)
+        int_value = int.from_bytes(decrypted, byteorder='big', signed=True)
+        self.assertEqual(int_value, 0)
+
+    def test_decrypt_revenue_counter_negatuve(self):
+        encrypted = b64decode(encrypt_revenue_counter(-10.0,
+                                                      self.AES_KEY,
+                                                      "DEMO-CASH-BOX",
+                                                      1))
+        decrypted = self._decrypt(self.AES_KEY, encrypted, "DEMO-CASH-BOX",
+                                  1)
+        int_value = int.from_bytes(decrypted, byteorder='big', signed=True)
+        self.assertEqual(int_value, -1000)
+
+    def test_decrypt_revenue_counter_positive(self):
+        encrypted = b64decode(encrypt_revenue_counter(22.0,
+                                                      self.AES_KEY,
+                                                      "DEMO-CASH-BOX",
+                                                      1))
+        decrypted = self._decrypt(self.AES_KEY, encrypted, "DEMO-CASH-BOX",
+                                  1)
+        int_value = int.from_bytes(decrypted, byteorder='big', signed=True)
+        self.assertEqual(int_value, 2200)
+
+    def test_decrypt_revenue_counter_after_addition_with_one_decimal_place(self):
+        encrypted = b64decode(encrypt_revenue_counter(1.2 + 2.4,
+                                                      self.AES_KEY,
+                                                      "DEMO-CASH-BOX",
+                                                      1))
+        decrypted = self._decrypt(self.AES_KEY, encrypted, "DEMO-CASH-BOX",
+                                  1)
+        int_value = int.from_bytes(decrypted, byteorder='big', signed=True)
+        self.assertEqual(int_value, 360)
+
+    def test_decrypt_revenue_counter_after_addition_with_two_decimal_places(self):
+        encrypted = b64decode(encrypt_revenue_counter(3.33 + 3.11,
+                                                      self.AES_KEY,
+                                                      "DEMO-CASH-BOX",
+                                                      1))
+        decrypted = self._decrypt(self.AES_KEY, encrypted, "DEMO-CASH-BOX",
+                                  1)
+        int_value = int.from_bytes(decrypted, byteorder='big', signed=True)
+        self.assertEqual(int_value, 644)
+
+    def _decrypt(self, key, encrypted, pos_name, sequence_number):
+        cipher = Cipher(algorithms.AES(b64decode(key)), _init_vector(pos_name, sequence_number))
+        encryptor = cipher.decryptor()
+        return (encryptor.update(encrypted) + encryptor.finalize())[:5]
+
+    def test_aes_check_sum(self):
+        self.assertEqual(generate_aes_checksum("cWhay3H4asTvRzXzXGZQ3KyBEu9BZaIxl8J+L4Bhr5A="),"qx6p")
+
+if __name__ == "__main__":
+    unittest.main()
