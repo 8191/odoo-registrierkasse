@@ -60,7 +60,7 @@ class CustomPOSConfig(models.Model):
         )
 
     def copy(self, default=None):
-        raise NotImplemented("Copying POS is not allowed when using the Austrian Registrierkasse module")
+        raise UserError(_("Copying POS is not allowed when using the Austrian Registrierkasse module"))
 
     @api.model_create_multi
     def create(self, vals_list):
