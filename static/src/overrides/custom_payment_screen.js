@@ -13,7 +13,7 @@ patch(PaymentScreen.prototype, {
 
         const has_lines = order.lines.some((line) => line.get_quantity() !== 0);
 
-        if (navigator.onLine && has_lines) {
+        if (this.pos.config.pos_use_registrierkasse && navigator.onLine && has_lines) {
             try {
                 let sum_vat_normal = 0;
                 let sum_vat_discounted_1 = 0;
@@ -24,6 +24,9 @@ patch(PaymentScreen.prototype, {
 
                 const order = this.currentOrder;
                 order.recomputeOrderData()
+                /****
+                 * Keep logic in sync with pos.order#_compute_rksv_sums
+                 ****/
                 order.lines.forEach(function (line) {
                     const lineAmount = line.get_price_with_tax();
                     const taxPercentage = line.tax_ids?.[0]?.amount ?? 0;

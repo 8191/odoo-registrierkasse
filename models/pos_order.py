@@ -1,9 +1,14 @@
+import logging
+
 from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 
 from .libs.a_trust.a_trust_library import SessionData, OrderData, LoginData
 from .utils.order_utils import chain_hash, format_order_date
 from .utils.revenue_counter import encrypt_revenue_counter
+
+
+_logger = logging.getLogger(__name__)
 
 
 class CustomPOSOrder(models.Model):
@@ -16,17 +21,18 @@ class CustomPOSOrder(models.Model):
     certificate_serial_number = fields.Char('Serial number of the certificate', readonly=True, copy=False)
     registrierkasse_receipt_number = fields.Integer('Sequence of receipt specific to RKSV', readonly=True, copy=False, index=True)
 
-    sum_vat_normal = fields.Float('RKSV VAT Normal', digits=(16, 2), readonly=True, copy=False, required=True, default=0.0, help="VAT 20%")
-    sum_vat_discounted_1 = fields.Float('RKSV VAT Discounted 1', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0, help="VAT 10%")
-    sum_vat_discounted_2 = fields.Float('RKSV VAT Discounted 2', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0, help="VAT 13%")
-    sum_vat_null = fields.Float('RKSV VAT Null', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0, help="VAT 0%")
-    sum_vat_special = fields.Float('RKSV VAT Special', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0)
-    sum_total_rksv = fields.Float('RKSV Total Sum', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0)
+    sum_vat_normal = fields.Float('RKSV VAT Normal', digits=(16, 2), readonly=True, copy=False, required=True, help="VAT 20%")
+    sum_vat_discounted_1 = fields.Float('RKSV VAT Discounted 1', digits=(16, 2), copy=False, readonly=True, required=True, help="VAT 10%")
+    sum_vat_discounted_2 = fields.Float('RKSV VAT Discounted 2', digits=(16, 2), copy=False, readonly=True, required=True, help="VAT 13%")
+    sum_vat_null = fields.Float('RKSV VAT Null', digits=(16, 2), copy=False, readonly=True, required=True, help="VAT 0%")
+    sum_vat_special = fields.Float('RKSV VAT Special', digits=(16, 2), copy=False, readonly=True, required=True)
+    sum_total_rksv = fields.Float('RKSV Total Sum', digits=(16, 2), copy=False, readonly=True, required=True)
 
     rksv_state = fields.Selection(
         [('pending', 'Pending'), ('signed', 'Signed'), ('not_signed', 'Not signed'), ('cancel', 'Cancelled')],
         'RKSV Status', readonly=True, copy=False)
 
+    @api.model
     def _get_rksv_signature(self, config, order_vals, is_refund=False):
         """Helper method to perform RKSV signing."""
         if "sum_total_rksv" in order_vals:
@@ -39,6 +45,7 @@ class CustomPOSOrder(models.Model):
         prev_order = self.env['pos.order'].search(
             [('registrierkasse_receipt_number', '=', int(receipt_number) - 1),
              ('config_id', '=', config.id)], limit=1)
+        _logger.info("Found previous order %s for current order %s", prev_order, order_vals.get('id'))
 
         if is_refund:
             encrypted_revenue = "U1RP"  # Storno
@@ -106,6 +113,9 @@ class CustomPOSOrder(models.Model):
             'sum_vat_special': 0.0,
         }
 
+        #####
+        # Keep logic in sync with custom_payment_screen.js
+        #####
         for line in lines:
             price = line.price_subtotal_incl
             if line.tax_ids:
@@ -116,7 +126,7 @@ class CustomPOSOrder(models.Model):
                         sums['sum_vat_discounted_1'] += price
                     case 13:
                         sums['sum_vat_discounted_2'] += price
-                    case 0:
+                    case 0 if not line.reward_id or line.reward_id.program_id.program_type not in {'gift_card', 'ewallet'}:
                         sums['sum_vat_null'] += price
                     case _:
                         sums['sum_vat_special'] += price
@@ -142,11 +152,14 @@ class CustomPOSOrder(models.Model):
         return self._get_rksv_signature(session.config_id, order_data_dict, is_refund=is_refund)
 
     def sign_order(self):
+        self = self.sorted(key='date_order')
         for order in self:
             if order.registrierkasse_receipt_number:
                 continue  # Already signed
             if not order.session_id.config_id.pos_use_registrierkasse:
                 continue  # POS not enabled for RKSV
+            if order.state not in {'paid', 'done', 'invoiced'}:
+                continue  # Only confirmed ordered can be signed
 
             # Calculate sums from existing order lines
             sums = self._compute_rksv_sums(order.lines)
@@ -160,7 +173,7 @@ class CustomPOSOrder(models.Model):
                     break
 
             order_vals = {
-                'sum_total_rksv': order.amount_total,
+                'amount_total': order.amount_total,
                 **sums
             }
 
@@ -205,7 +218,6 @@ class CustomPOSOrder(models.Model):
             if vals.get('registrierkasse_receipt_number'):
                 vals['rksv_state'] = 'signed'
             elif not order.registrierkasse_receipt_number and order.config_id.pos_use_registrierkasse:
-                vals['sum_total_rksv'] = None
                 match vals.get('state'):
                     case 'cancel':
                         vals['rksv_state'] = 'cancel'
