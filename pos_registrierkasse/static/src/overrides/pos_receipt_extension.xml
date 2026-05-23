@@ -8,7 +8,7 @@
                     Kassenidentifikationsnummer: <t t-esc="props.data.kassenidentifikationsnummer" />
                 </div>
                 <div class="pos-receipt-order-data">
-                    Fortlaufende Belegnummer:<t t-esc="props.data.fortlaufendeBelegnummer" />
+                    Fortlaufende Belegnummer: <t t-esc="props.data.fortlaufendeBelegnummer" />
                 </div>
             </t>
             <t t-elif="props.data.pos_use_registrierkasse">

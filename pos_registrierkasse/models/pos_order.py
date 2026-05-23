@@ -30,9 +30,7 @@ class CustomPOSOrder(models.Model):
     def _generate_pos_reference(self, order):
         """Generate a consistent pos_reference for an order."""
         order_sequence_in_session = self.search_count([('session_id', '=', order.session_id.id)])
-        return (f"{order.session_id.id:05d}-"
-                f"{order_sequence_in_session:03d}-"
-                f"{order.registrierkasse_receipt_number:04d}")
+        return (f"{_('Order')} {order.session_id.id:05d}-{order_sequence_in_session:03d}-{order.registrierkasse_receipt_number:04d}")
 
     def _get_rksv_signature(self, config, order_vals, is_refund=False):
         """Helper method to perform RKSV signing."""
