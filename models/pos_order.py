@@ -9,11 +9,11 @@ from .utils.revenue_counter import encrypt_revenue_counter
 class CustomPOSOrder(models.Model):
     _inherit = 'pos.order'
 
-    encrypted_revenue = fields.Char('Encrypted revenue counter', readonly=True)
-    order_signature = fields.Char('Signature from signing unit', readonly=True)
-    prev_order_signature = fields.Char('Signature of the previous invoice', readonly=True)
-    machine_readable_code = fields.Char('Machine readable code of RKSV', readonly=True)
-    certificate_serial_number = fields.Char('Serial number of the certificate', readonly=True)
+    encrypted_revenue = fields.Char('Encrypted revenue counter', readonly=True, copy=False)
+    order_signature = fields.Char('Signature from signing unit', readonly=True, copy=False)
+    prev_order_signature = fields.Char('Signature of the previous invoice', readonly=True, copy=False)
+    machine_readable_code = fields.Char('Machine readable code of RKSV', readonly=True, copy=False)
+    certificate_serial_number = fields.Char('Serial number of the certificate', readonly=True, copy=False)
     registrierkasse_receipt_number = fields.Integer('Sequence of receipt specific to RKSV', readonly=True, copy=False, index=True)
 
     sum_vat_normal = fields.Float('RKSV VAT Normal', digits=(16, 2), readonly=True, copy=False, required=True, default=0.0, help="VAT 20%")
