@@ -172,24 +172,6 @@ class CustomPOSOrder(models.Model):
 
         return order_id
 
-    def _prepare_refund_values(self, current_session):
-        self.ensure_one()
-        values = super()._prepare_refund_values(current_session)
-        values.update({
-            'registrierkasse_receipt_number': None,
-            'order_signature': None,
-            'prev_order_signature': None,
-            'machine_readable_code': None,
-            'encrypted_revenue': None,
-            'certificate_serial_number': None,
-        })
-        return values
-
-    def _process_saved_order(self, draft):
-        res = super()._process_saved_order(draft)
-        self.action_retry_signing()
-        return res
-
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -213,6 +195,7 @@ class CustomPOSOrder(models.Model):
             if vals.get('registrierkasse_receipt_number'):
                 vals['rksv_state'] = 'signed'
             elif not order.registrierkasse_receipt_number:
+                vals['sum_total_rksv'] = None
                 match vals.get('state'):
                     case 'cancel':
                         vals['rksv_state'] = 'cancel'

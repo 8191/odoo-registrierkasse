@@ -53,4 +53,16 @@
             </xpath>
         </field>
     </record>
+
+    <record id="view_pos_order_filter_registrierkasse" model="ir.ui.view">
+        <field name="name">pos.order.list.select.registrierkasse</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_filter"/>
+        <field name="arch" type="xml">
+            <filter name="order_date" position="after">
+                <separator/>
+                <filter string="Missing RKSV Signature" name="not_signed" domain="[('rksv_state', '=', 'not_signed')]"/>
+            </filter>
+        </field>
+    </record>
 </odoo>
