@@ -145,7 +145,7 @@ class CustomPOSConfig(models.Model):
 
         order = self._rksv_create_null_order(
             pos_config_rec, pos_session, receipt_num, order_date_obj,
-            initial_prev_order_sig_hash, 1)
+            initial_prev_order_sig_hash, 1, _('RKSV Opening receipt'))
         order.action_pos_order_paid()
 
         # Step 3: Perform RKSV Signing
@@ -274,7 +274,7 @@ class CustomPOSConfig(models.Model):
 
             order = self._rksv_create_null_order(
                 self, pos_session, receipt_num, order_date_obj,
-                prev_order_jws_hash_for_chaining, order_sequence_in_session)
+                prev_order_jws_hash_for_chaining, order_sequence_in_session, _('RKSV Null receipt'))
             order.action_pos_order_paid()
 
             # Step 2: Perform RKSV Signing
@@ -373,7 +373,8 @@ class CustomPOSConfig(models.Model):
         return pos_session
 
     def _rksv_create_null_order(self, pos_config_rec, pos_session, receipt_num, order_date_obj,
-                                prev_signature_hash_for_order_field, order_sequence_in_session):
+                                prev_signature_hash_for_order_field, order_sequence_in_session,
+                                pos_reference):
         """Helper to create a null POS order for RKSV."""
         order = self.env['pos.order'].create({
             'date_order': order_date_obj,
@@ -385,7 +386,7 @@ class CustomPOSConfig(models.Model):
             'registrierkasse_receipt_number': receipt_num,
             'certificate_serial_number': pos_config_rec.certificate_serial_number,
             'prev_order_signature': prev_signature_hash_for_order_field,
-            'pos_reference': f"{pos_session.id:05d}-{order_sequence_in_session:03d}-{int(receipt_num):04d}",
+            'pos_reference': f"{pos_reference} {pos_session.id:05d}-{order_sequence_in_session:03d}-{int(receipt_num):04d}",
             'general_note': _("Automatic Null Receipt booking from RKSV"),
             'state': 'done'
         })
