@@ -2,7 +2,7 @@ from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 
 from .libs.a_trust.a_trust_library import SessionData, OrderData, LoginData
-from .utils.order_utils import chain_hash, format_order_date, base64url_to_base64
+from .utils.order_utils import chain_hash, format_order_date
 from .utils.revenue_counter import encrypt_revenue_counter
 
 
@@ -33,9 +33,9 @@ class CustomPOSOrder(models.Model):
     def _get_rksv_signature(self, config, order_vals, is_refund=False):
         """Helper method to perform RKSV signing."""
         if "sum_total_rksv" in order_vals:
-            config.revenue_counter += order_vals.get('sum_total_rksv', 0.0)
+            config.revenue_counter += order_vals.get('sum_total_rksv', 0.0) * 100.0
         else:
-            config.revenue_counter += order_vals.get('amount_total', 0.0)
+            config.revenue_counter += order_vals.get('amount_total', 0.0) * 100.0
 
         receipt_number = int(config.receipt_sequence_id.next_by_id())
 
@@ -62,7 +62,7 @@ class CustomPOSOrder(models.Model):
 
         machine_readable_code = OrderData(
             config.name,
-            receipt_number,
+            str(receipt_number),
             format_order_date(date_order_str),
             order_vals.get("sum_vat_normal", 0.0),
             order_vals.get("sum_vat_discounted_1", 0.0),

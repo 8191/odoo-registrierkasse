@@ -180,6 +180,11 @@ msgid "If this lock is set, RKSV settings can not be changed"
 msgstr "RKSV Einstellungen gesperrt"
 
 #. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__revenue_counter
+msgid "Internal Revenue Counter"
+msgstr "Umsatzzähler"
+
+#. module: pos_registrierkasse
 #. odoo-javascript
 #: code:addons/pos_registrierkasse/static/src/overrides/pos_receipt_extension.xml:0
 msgid "Kassenidentifikationsnummer:"
