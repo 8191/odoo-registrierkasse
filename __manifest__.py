@@ -30,6 +30,7 @@
         ],
     },
     'data': [
+        'data/pos_order_data.xml',
         'views/pos_config.xml',
         'views/point_of_sale_dashboard.xml',
         'views/res_config_settings_view.xml',
