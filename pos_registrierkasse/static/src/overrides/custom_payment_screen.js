@@ -57,9 +57,7 @@ patch(PaymentScreen.prototype, {
                 order.sum_vat_special = sum_vat_special;
                 order.sum_total_rksv = sum_vat_normal + sum_vat_discounted_1 + sum_vat_discounted_2 + sum_vat_null + sum_vat_special;
 
-                const signature = await this.pos.data.call("pos.order", "sign_order", [order.serialize(), isRefund]);
-
-
+                const signature = await this.pos.data.call("pos.order", "sign_order_from_ui", [order.serialize(), isRefund]);
                 order.certificate_serial_number = signature.certificate_serial_number
                 order.prev_order_signature = signature.prev_order_signature
                 order.machine_readable_code = signature.machine_readable_code
