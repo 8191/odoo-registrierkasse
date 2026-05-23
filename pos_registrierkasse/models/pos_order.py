@@ -23,6 +23,10 @@ class CustomPOSOrder(models.Model):
     sum_vat_special = fields.Float('RKSV VAT Special', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0)
     sum_total_rksv = fields.Float('RKSV Total Sum', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0)
 
+    rksv_state = fields.Selection(
+        [('pending', 'Pending'), ('signed', 'Signed'), ('not_signed', 'Not signed'), ('cancel', 'Cancelled')],
+        'RKSV Status', readonly=True, copy=False)
+
     def _generate_pos_reference(self, order):
         """Generate a consistent pos_reference for an order."""
         order_sequence_in_session = self.search_count([('session_id', '=', order.session_id.id)])
@@ -187,6 +191,36 @@ class CustomPOSOrder(models.Model):
         res = super()._process_saved_order(draft)
         self.action_retry_signing()
         return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            session = self.env['pos.session'].browse(vals['session_id'])
+            if session.config_id.pos_use_registrierkasse:
+                match vals.get('state', 'draft'):
+                    case _ if vals.get('registrierkasse_receipt_number'):
+                        vals['rksv_state'] = 'signed'
+                    case 'draft':
+                        vals['rksv_state'] = 'pending'
+                    case 'cancel':
+                        vals['rksv_state'] = 'cancel'
+                    case _:
+                        vals['rksv_state'] = 'not_signed'
+            else:
+                vals['rksv_state'] = None
+        return super().create(vals_list)
+
+    def write(self, vals):
+        for order in self:
+            if vals.get('registrierkasse_receipt_number'):
+                vals['rksv_state'] = 'signed'
+            elif not order.registrierkasse_receipt_number:
+                match vals.get('state'):
+                    case 'cancel':
+                        vals['rksv_state'] = 'cancel'
+                    case 'paid' | 'done' | 'invoiced':
+                        vals['rksv_state'] = 'not_signed'
+        return super().write(vals)
 
     def unlink(self):
         """Prevent deletion of RKSV-signed orders."""
