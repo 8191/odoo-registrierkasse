@@ -84,6 +84,11 @@ msgid "Activate FinanzOnline-Integration"
 msgstr "FinanzOnline-Integration aktivieren"
 
 #. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_order_tree_registrierkasse
+msgid "Amount total"
+msgstr "Gesamtsumme"
+
+#. module: pos_registrierkasse
 #. odoo-python
 #: code:addons/pos_registrierkasse/models/pos_config.py:0
 msgid "Automatic Null Receipt booking from RKSV"
@@ -191,10 +196,9 @@ msgid "Kassenidentifikationsnummer:"
 msgstr "Kassenidentifikationsnummer:"
 
 #. module: pos_registrierkasse
-#. odoo-javascript
-#: code:addons/pos_registrierkasse/static/src/overrides/customer_display_override.xml:0
-msgid "Logo"
-msgstr "Logo"
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__machine_readable_code
+msgid "Machine readable code of RKSV"
+msgstr "Maschinenlesbarer Code der Registrierkasse"
 
 #. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
@@ -239,11 +243,51 @@ msgid "RKSV Compliance"
 msgstr "RKSV Konformität"
 
 #. module: pos_registrierkasse
-#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
-msgid "RKSV Settings"
-msgstr "RKSV Einstellungen"
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__display_revenue_counter
+msgid "RKSV Revenue Counter"
+msgstr "Umsatzzähler"
 
 #. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "RKSV Settings"
+msgstr "Registrierkassen-Einstellungen"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_order_filter_registrierkasse
+msgid "RKSV Signed"
+msgstr "Signiert durch Registrierkasse"
+
+#. module: pos_registrierkasse
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_total_rksv
+msgid "RKSV Total Sum"
+msgstr "RKSV Gesamtsumme"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_discounted_1
+msgid "RKSV VAT Discounted 1"
+msgstr "RKSV Ermäßigt 1 (10%)"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_discounted_2
+msgid "RKSV VAT Discounted 2"
+msgstr "RKSV Ermäßigt 2 (13%)"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_normal
+msgid "RKSV VAT Normal"
+msgstr "RKSV Normalsteuer (20%)"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_null
+msgid "RKSV VAT Null"
+msgstr "RKSV Nullsteuer (0%)"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_special
+msgid "RKSV VAT Special"
+msgstr "RKSV Sondersteuer"
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__receipt_sequence_id
 msgid "Receipt IDs Sequence"
 msgstr "Belegnummernkreis"
@@ -254,14 +298,19 @@ msgid "Retry Signing"
 msgstr "Signatur erneut versuchen"
 
 #. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
+msgid "Revenue Counter"
+msgstr "Umsatzzähler"
+
+#. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__registrierkasse_receipt_number
 msgid "Sequence of receipt specific to RKSV"
-msgstr "RKSV Belegnummer "
+msgstr "RKSV Belegnummer"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__certificate_serial_number
 msgid "Serial number of the certificate"
-msgstr "Seriennummer des Zertifikats "
+msgstr "Seriennummer des Zertifikats"
 
 #. module: pos_registrierkasse
 #. odoo-javascript
@@ -313,11 +362,6 @@ msgid "The name of the POS must be unique!"
 msgstr "Der Name des POS muss eindeutig sein!"
 
 #. module: pos_registrierkasse
-#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__machine_readable_code
-msgid "The whole code sent to A-Trust"
-msgstr "Maschinenlesbarer Code"
-
-#. module: pos_registrierkasse
 #: model:ir.model.fields,help:pos_registrierkasse.field_pos_config__receipt_sequence_id
 msgid ""
 "This sequence is automatically created by Odoo but you can change it to "
@@ -333,14 +377,9 @@ msgid "Time for Nullbeleg"
 msgstr "Zeitpunkt für Nullbeleg"
 
 #. module: pos_registrierkasse
-#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__revenue_counter
-msgid "Total"
-msgstr "Umsatzzähler"
-
-#. module: pos_registrierkasse
-#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_total_rksv
-msgid "Total sum"
-msgstr "Gesamtsumme"
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
+msgid "Total Sum"
+msgstr "RKSV Gesamtsumme"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__registrierkasse_aes_key
@@ -376,28 +415,31 @@ msgstr "13% USt"
 #: model:ir.model.fields,help:pos_registrierkasse.field_pos_order__sum_vat_normal
 msgid "VAT 20%"
 msgstr "20% USt"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
 msgid "VAT Discounted 1"
-msgstr "Ermäßigt 1 (10%)"
+msgstr "USt Ermäßigt 1"
 
 #. module: pos_registrierkasse
-#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_discounted_2
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
 msgid "VAT Discounted 2"
-msgstr "Ermäßigt 2 (13%)"
+msgstr "USt Ermäßigt 2"
 
 #. module: pos_registrierkasse
-#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_normal
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
 msgid "VAT Normal"
-msgstr "Normalsteuer (20%)"
+msgstr "USt Normalsteuer"
 
 #. module: pos_registrierkasse
-#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_null
-msgid "VAT null"
-msgstr "Nullsteuer (0%)"
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
+msgid "VAT Null"
+msgstr "USt Nullsteuer"
 
 #. module: pos_registrierkasse
-#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_special
-msgid "VAT special"
-msgstr "Sondersteuer"
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
+msgid "VAT Special"
+msgstr "USt Sondersteuer"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__certificate_certification_body
@@ -405,12 +447,18 @@ msgid "Zertifizierungsstellen for Beleg Gruppe"
 msgstr "Zertifizierungsstellen"
 
 #. module: pos_registrierkasse
-#. odoo-javascript
-#: code:addons/pos_registrierkasse/static/src/overrides/customer_display_override.xml:0
-msgid "and"
-msgstr "und"
-
-#. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
 msgid "e.g. NYC Shop"
 msgstr "z.B. NYC Shop"
+
+#~ msgid "The whole code sent to A-Trust"
+#~ msgstr "Maschinenlesbarer Code"
+
+#~ msgid "Logo"
+#~ msgstr "Logo"
+
+#~ msgid "Total"
+#~ msgstr "Umsatzzähler"
+
+#~ msgid "and"
+#~ msgstr "und"

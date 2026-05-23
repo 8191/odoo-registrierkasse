@@ -12,4 +12,41 @@
             </xpath>
         </field>
     </record>
+
+    <record id="view_pos_order_tree_registrierkasse" model="ir.ui.view">
+        <field name="name">pos.order.list.registrierkasse</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="registrierkasse_receipt_number" invisible="not registrierkasse_receipt_number" optional="hide" groups="base.group_no_one"/>
+            </field>
+            <field name="amount_total" position="after">
+                <field name="sum_total_rksv" sum="Amount total" widget="monetary" invisible="rksv_state != 'signed'" optional="hide" groups="base.group_no_one"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_pos_pos_form_registrierkasse" model="ir.ui.view">
+        <field name="name">pos.order.form.registrierkasse</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <field name="failed_pickings" position="before">
+                <widget name="web_ribbon" title="Not Signed" bg_color="bg-danger" invisible="rksv_state != 'not_signed'"/>
+            </field>
+            <xpath expr="//page[@name='extra']/group" position="inside">
+                <group string="Cash Register" invisible="not rksv_state" groups="base.group_no_one">
+                    <field name="rksv_state" decoration-success="rksv_state == 'signed'" decoration-danger="rksv_state == 'not_signed'"/>
+                    <field name="registrierkasse_receipt_number"/>
+                    <field string="VAT Normal" name="sum_vat_normal" widget="monetary"/>
+                    <field string="VAT Discounted 1" name="sum_vat_discounted_1" widget="monetary"/>
+                    <field string="VAT Discounted 2" name="sum_vat_discounted_2" widget="monetary"/>
+                    <field string="VAT Null" name="sum_vat_null" widget="monetary"/>
+                    <field string="VAT Special" name="sum_vat_special" widget="monetary"/>
+                    <field string="Total Sum" name="sum_total_rksv" widget="monetary"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
 </odoo>
