@@ -353,7 +353,24 @@ msgid "User ID"
 msgstr "Benutzer-ID"
 
 #. module: pos_registrierkasse
-#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_discounted_1
+#: model:ir.model.fields,help:pos_registrierkasse.field_pos_order__sum_vat_null
+msgid "VAT 0%"
+msgstr "0% USt"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,help:pos_registrierkasse.field_pos_order__sum_vat_discounted_1
+msgid "VAT 10%"
+msgstr "10% USt"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,help:pos_registrierkasse.field_pos_order__sum_vat_discounted_2
+msgid "VAT 13%"
+msgstr "13% USt"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,help:pos_registrierkasse.field_pos_order__sum_vat_normal
+msgid "VAT 20%"
+msgstr "20% USt"
 msgid "VAT Discounted 1"
 msgstr "Ermäßigt 1 (10%)"
 
