@@ -71,6 +71,13 @@ class CustomPOSConfig(models.Model):
                 pos_config._setup_cron_job()
         return pos_configs
 
+    def unlink(self):
+        for config in self:
+            cron_name = f'POS: Create Nullbeleg for {config.name}'
+            cron = self.env['ir.cron'].sudo().search([('name', '=', cron_name)], limit=1)
+            if cron:
+                cron.sudo().unlink()
+
     @api.onchange('monthly_nullbeleg_time')
     def _onchange_monthly_nullbeleg_time(self):
         self._setup_cron_job()
@@ -200,7 +207,7 @@ class CustomPOSConfig(models.Model):
     def _setup_cron_job(self):
         for config in self:
             _logger.info(f"RKSV: Creating/updating cron job for POS config '{config.name}' (ID: {config.id}).")
-            cron_name = f'POS: Create Nullbeleg for {config.name}'
+            cron_name = f'POS: Create Nullbeleg for {config.name}' # Keep in sync with unlink()
             cron = self.env['ir.cron'].sudo().search([('name', '=', cron_name)], limit=1)
             if not cron:
                 cron = self.env['ir.cron'].sudo().create({
