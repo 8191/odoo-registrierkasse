@@ -9,19 +9,19 @@ from .utils.revenue_counter import encrypt_revenue_counter
 class CustomPOSOrder(models.Model):
     _inherit = 'pos.order'
 
-    encrypted_revenue = fields.Char(string='Encrypted revenue counter', translate=True)
-    order_signature = fields.Char(string='Signature from signing unit', translate=True)
-    prev_order_signature = fields.Char(string='Signature of the previous invoice', translate=True)
-    machine_readable_code = fields.Char(string='The whole code sent to A-Trust', translate=True)
-    certificate_serial_number = fields.Char(string='Serial number of the certificate', translate=True)
-    registrierkasse_receipt_number = fields.Integer(string='Sequence of receipt specific to RKSV ', index=True)
+    encrypted_revenue = fields.Char('Encrypted revenue counter', readonly=True)
+    order_signature = fields.Char('Signature from signing unit', readonly=True)
+    prev_order_signature = fields.Char('Signature of the previous invoice', readonly=True)
+    machine_readable_code = fields.Char('Machine readable code of RKSV', readonly=True)
+    certificate_serial_number = fields.Char('Serial number of the certificate', readonly=True)
+    registrierkasse_receipt_number = fields.Integer('Sequence of receipt specific to RKSV', readonly=True, copy=False, index=True)
 
-    sum_vat_normal = fields.Float(string='VAT Normal', digits=(16, 2), required=True, default=0)
-    sum_vat_discounted_1 = fields.Float(string='VAT Discounted 1', digits=(16, 2), required=True, default=0)
-    sum_vat_discounted_2 = fields.Float(string='VAT Discounted 2', digits=(16, 2), required=True, default=0)
-    sum_vat_null = fields.Float(string='VAT null', digits=(16, 2), required=True, default=0)
-    sum_vat_special = fields.Float(string='VAT special', digits=(16, 2), required=True, default=0)
-    sum_total_rksv = fields.Float(string='Total sum', digits=(16, 2), required=True, default=0)
+    sum_vat_normal = fields.Float('RKSV VAT Normal', digits=(16, 2), readonly=True, copy=False, required=True, default=0.0, help="VAT 20%")
+    sum_vat_discounted_1 = fields.Float('RKSV VAT Discounted 1', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0, help="VAT 10%")
+    sum_vat_discounted_2 = fields.Float('RKSV VAT Discounted 2', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0, help="VAT 13%")
+    sum_vat_null = fields.Float('RKSV VAT Null', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0, help="VAT 0%")
+    sum_vat_special = fields.Float('RKSV VAT Special', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0)
+    sum_total_rksv = fields.Float('RKSV Total Sum', digits=(16, 2), copy=False, readonly=True, required=True, default=0.0)
 
     def _generate_pos_reference(self, order):
         """Generate a consistent pos_reference for an order."""
@@ -183,43 +183,10 @@ class CustomPOSOrder(models.Model):
         })
         return values
 
-    def _refund(self):
-        refund_orders = super()._refund()
-
-        for order in self:
-            refund_order = refund_orders.filtered(lambda r: r.refunded_order_id == order)
-            if not refund_order:
-                continue
-
-            config = refund_order.session_id.config_id
-            if not config.pos_use_registrierkasse:
-                continue
-
-            refund_order.write({
-                'sum_vat_normal': -order.sum_vat_normal,
-                'sum_vat_discounted_1': -order.sum_vat_discounted_1,
-                'sum_vat_discounted_2': -order.sum_vat_discounted_2,
-                'sum_vat_null': -order.sum_vat_null,
-                'sum_vat_special': -order.sum_vat_special,
-            })
-
-            refund_vals = {
-                'amount_total': refund_order.amount_total,
-                'date_order': refund_order.date_order,
-                'sum_vat_normal': refund_order.sum_vat_normal,
-                'sum_vat_discounted_1': refund_order.sum_vat_discounted_1,
-                'sum_vat_discounted_2': refund_order.sum_vat_discounted_2,
-                'sum_vat_null': refund_order.sum_vat_null,
-                'sum_vat_special': refund_order.sum_vat_special,
-            }
-
-            rksv_data = self._get_rksv_signature(config, refund_vals, is_refund=True)
-            refund_order.write(rksv_data)
-
-            new_ref = self._generate_pos_reference(refund_order)
-            refund_order.write({'pos_reference': new_ref})
-
-        return refund_orders
+    def _process_saved_order(self, draft):
+        res = super()._process_saved_order(draft)
+        self.action_retry_signing()
+        return res
 
     def unlink(self):
         """Prevent deletion of RKSV-signed orders."""
@@ -246,12 +213,12 @@ class CustomPOSOrder(models.Model):
             is_refund = self._is_rksv_refund(order.lines)
 
             order_vals = {
-                'amount_total': order.amount_total,
+                'sum_total_rksv': order.amount_total,
                 **sums
             }
 
             try:
                 rksv_data = self._get_rksv_signature(config, order_vals, is_refund=is_refund)
-                order.write(rksv_data)
+                order.write(order_vals | rksv_data)
             except Exception as e:
                 raise UserError(_("Signing failed: %s") % str(e))
