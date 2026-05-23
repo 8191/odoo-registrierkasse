@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 05:01+0000\n"
-"PO-Revision-Date: 2026-05-22 07:03+0200\n"
+"POT-Creation-Date: 2026-05-23 00:27+0000\n"
+"PO-Revision-Date: 2026-05-23 02:28+0200\n"
 "Last-Translator: Manuel Faux <mfaux@conf.at>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -95,9 +95,28 @@ msgid "Automatic Null Receipt booking from RKSV"
 msgstr "Automatische Nullbeleg Buchung der Registrierkasse"
 
 #. module: pos_registrierkasse
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_order__rksv_state__cancel
+msgid "Cancelled"
+msgstr "Abgebrochen"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
+msgid "Cash Register"
+msgstr "Registrierkasse"
+
+#. module: pos_registrierkasse
 #: model:ir.model,name:pos_registrierkasse.model_res_config_settings
 msgid "Config Settings"
 msgstr "Konfigurationseinstellungen"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid ""
+"Copying POS is not allowed when using the Austrian Registrierkasse module"
+msgstr ""
+"Das Kopieren von POS-Daten ist bei Verwendung des Moduls „Österreichische "
+"Registrierkasse“ nicht zulässig"
 
 #. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
@@ -212,9 +231,30 @@ msgid "Monthly Null Receipt Session"
 msgstr "Monatliche Nullbeleg Sitzung"
 
 #. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
+msgid "Not Signed"
+msgstr "Nicht signiert"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_order__rksv_state__not_signed
+msgid "Not signed"
+msgstr "Nicht signiert"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_order.py:0
+msgid "Order"
+msgstr "Auftrag"
+
+#. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
 msgid "Participant ID"
 msgstr "Teilnehmer-ID"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_order__rksv_state__pending
+msgid "Pending"
+msgstr "In Bearbeitung"
 
 #. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
@@ -243,6 +283,17 @@ msgid "RKSV Compliance"
 msgstr "RKSV Konformität"
 
 #. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid "RKSV Null receipt"
+msgstr "RKSV Nullsteuer (0%)"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid "RKSV Opening receipt"
+msgstr "Startbeleg nach RKSV"
+
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__display_revenue_counter
 msgid "RKSV Revenue Counter"
@@ -259,6 +310,10 @@ msgid "RKSV Signed"
 msgstr "Signiert durch Registrierkasse"
 
 #. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__rksv_state
+msgid "RKSV Status"
+msgstr "Registrierkassenstatus"
+
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_total_rksv
 msgid "RKSV Total Sum"
@@ -288,6 +343,8 @@ msgstr "RKSV Nullsteuer (0%)"
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_vat_special
 msgid "RKSV VAT Special"
 msgstr "RKSV Sondersteuer"
+
+#. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__receipt_sequence_id
 msgid "Receipt IDs Sequence"
 msgstr "Belegnummernkreis"
@@ -332,6 +389,11 @@ msgstr "Signatur des vorhergehenden Belegs"
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__signature_certificate
 msgid "Signaturzertifikat for Beleg Gruppe"
 msgstr "Signaturzertifikat"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_order__rksv_state__signed
+msgid "Signed"
+msgstr "Signiert"
 
 #. module: pos_registrierkasse
 #. odoo-python
