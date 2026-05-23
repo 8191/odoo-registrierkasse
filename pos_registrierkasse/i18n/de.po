@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-23 06:18+0000\n"
-"PO-Revision-Date: 2026-05-23 08:22+0200\n"
+"POT-Creation-Date: 2026-05-23 18:59+0000\n"
+"PO-Revision-Date: 2026-05-23 20:59+0200\n"
 "Last-Translator: Manuel Faux <mfaux@conf.at>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -90,6 +90,16 @@ msgstr "Gesamtsumme"
 
 #. module: pos_registrierkasse
 #. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_order.py:0
+msgid ""
+"An order that has already been signed in the cash register (RKSV) cannot be "
+"deleted. Please create a refund instead."
+msgstr ""
+"Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann nicht "
+"gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung."
+
+#. module: pos_registrierkasse
+#. odoo-python
 #: code:addons/pos_registrierkasse/models/pos_config.py:0
 msgid "Automatic Null Receipt booking from RKSV"
 msgstr "Automatische Nullbeleg Buchung der Registrierkasse"
@@ -136,16 +146,6 @@ msgstr "Datenerfassungsprotokoll"
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__pos_use_registrierkasse
 msgid "Does this POS use the RKSV module"
 msgstr "RKSV Modul für diesen POS verwenden"
-
-#. module: pos_registrierkasse
-#. odoo-python
-#: code:addons/pos_registrierkasse/models/pos_order.py:0
-msgid ""
-"Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann nicht "
-"gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung."
-msgstr ""
-"Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann nicht "
-"gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung."
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__encrypted_revenue
@@ -225,6 +225,11 @@ msgid "Make this POS RKSV compliant"
 msgstr "Diesen POS RKSV-konform machen"
 
 #. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_order_filter_registrierkasse
+msgid "Missing RKSV Signature"
+msgstr "Fehlende Signatur durch Registrierkasse"
+
+#. module: pos_registrierkasse
 #. odoo-python
 #: code:addons/pos_registrierkasse/models/pos_config.py:0
 msgid "Monthly Null Receipt Session"
@@ -267,6 +272,11 @@ msgid "Point of Sale Configuration"
 msgstr "Point of Sale Konfiguration"
 
 #. module: pos_registrierkasse
+#: model:ir.model,name:pos_registrierkasse.model_pos_make_payment
+msgid "Point of Sale Make Payment Wizard"
+msgstr "Assistent zum Tätigen von Zahlungen im Kassensystem"
+
+#. module: pos_registrierkasse
 #: model:ir.model,name:pos_registrierkasse.model_pos_order
 msgid "Point of Sale Orders"
 msgstr "Point of Sale Bestellungen"
@@ -281,11 +291,6 @@ msgstr "Produktionsumgebung"
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
 msgid "RKSV Compliance"
 msgstr "RKSV Konformität"
-
-#. module: pos_registrierkasse
-#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_order_filter_registrierkasse
-msgid "Missing RKSV Signature"
-msgstr "Fehlende Signatur durch Registrierkasse"
 
 #. module: pos_registrierkasse
 #. odoo-python
@@ -308,11 +313,6 @@ msgstr "Umsatzzähler"
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
 msgid "RKSV Settings"
 msgstr "Registrierkassen-Einstellungen"
-
-#. module: pos_registrierkasse
-#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_order_filter_registrierkasse
-msgid "RKSV Signed"
-msgstr "Signiert durch Registrierkasse"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__rksv_state
@@ -355,6 +355,7 @@ msgid "Receipt IDs Sequence"
 msgstr "Belegnummernkreis"
 
 #. module: pos_registrierkasse
+#: model:ir.actions.server,name:pos_registrierkasse.retry_signing
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_order_form_registrierkasse
 msgid "Retry Signing"
 msgstr "Signatur erneut versuchen"
@@ -379,6 +380,11 @@ msgstr "Seriennummer des Zertifikats"
 #: code:addons/pos_registrierkasse/static/src/overrides/pos_receipt_extension.xml:0
 msgid "Sicherheitseinrichtung ausgefallen"
 msgstr "Sicherheitseinrichtung ausgefallen"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
+msgid "Signature Status"
+msgstr "Signaturstatus"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__order_signature
@@ -517,6 +523,16 @@ msgstr "Zertifizierungsstellen"
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
 msgid "e.g. NYC Shop"
 msgstr "z.B. NYC Shop"
+
+#~ msgid ""
+#~ "Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann "
+#~ "nicht gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung."
+#~ msgstr ""
+#~ "Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann "
+#~ "nicht gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung."
+
+#~ msgid "RKSV Signed"
+#~ msgstr "Signiert durch Registrierkasse"
 
 #~ msgid "The whole code sent to A-Trust"
 #~ msgstr "Maschinenlesbarer Code"
