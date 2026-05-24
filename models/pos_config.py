@@ -85,6 +85,11 @@ class CustomPOSConfig(models.Model):
     def _onchange_monthly_nullbeleg_time(self):
         self._setup_cron_job()
 
+    @api.onchange('a_trust_environment', 'a_trust_password', 'a_trust_user_name')
+    def _onchange_atrust_config(self):
+        self.a_trust_session_id = ""
+        self.a_trust_session_key = ""
+
     def _create_sequence(self, pos_config):
         sequence = self.env['ir.sequence'].create({
             'name': f"POS Order Sequence for {pos_config.name}",
@@ -373,7 +378,7 @@ class CustomPOSConfig(models.Model):
             'type': 'ir.actions.act_window',
             'name': _("Unsigned Orders of %s", self.name),
             'res_model': 'pos.order',
-            'view_mode': 'list',
+            'view_mode': 'list,form',
             'domain': [('rksv_state', '=', 'not_signed'), ('config_id', '=', self.id)],
             'context': {'purpose': 'view_unsigned_orders'},
         }
