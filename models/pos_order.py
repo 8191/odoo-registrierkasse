@@ -27,11 +27,11 @@ class CustomPOSOrder(models.Model):
     sum_vat_discounted_2 = fields.Float('RKSV VAT Discounted 2', digits=(16, 2), copy=False, readonly=True, help="VAT 13%")
     sum_vat_null = fields.Float('RKSV VAT Null', digits=(16, 2), copy=False, readonly=True, help="VAT 0%")
     sum_vat_special = fields.Float('RKSV VAT Special', digits=(16, 2), copy=False, readonly=True)
-    sum_total_rksv = fields.Float('RKSV Total Sum', digits=(16, 2), copy=False, readonly=True)
+    sum_total_rksv = fields.Float('RKSV Total Sum', digits=(16, 2), copy=False, readonly=True, compute='_compute_sum_total_rksv', store=True)
 
     rksv_state = fields.Selection(
         [('pending', 'Pending'), ('signed', 'Signed'), ('not_signed', 'Not signed'), ('cancel', 'Cancelled')],
-        'RKSV Status', readonly=True, copy=False)
+        'RKSV Status', readonly=True, copy=False, compute='_compute_rksv_state', store=True)
 
     @api.depends('lines.refunded_qty', 'lines.qty')
     def _compute_has_refundable_lines(self):
@@ -40,13 +40,43 @@ class CustomPOSOrder(models.Model):
             # Don't allow to refund null product orders (see also CustomPOSConfig._get_null_product)
             order.has_refundable_lines = any([float_compare(line.qty, line.refunded_qty, digits) > 0 and not (line.product_id.type == 'service' and line.price_unit == 0) for line in order.lines])
 
+    @api.depends('registrierkasse_receipt_number', 'sum_vat_normal', 'sum_vat_discounted_1', 'sum_vat_discounted_2', 'sum_vat_null', 'sum_vat_special')
+    def _compute_sum_total_rksv(self):
+        for line in self:
+            if line.registrierkasse_receipt_number:
+                line.sum_total_rksv = line.sum_vat_normal + line.sum_vat_discounted_1 + line.sum_vat_discounted_2 + line.sum_vat_null + line.sum_vat_special
+            else:
+                line.sum_total_rksv = None
+
+    @api.depends('state', 'registrierkasse_receipt_number')
+    def _compute_rksv_state(self):
+        for line in self:
+            if line.config_id.pos_use_registrierkasse:
+                match line.state:
+                    case _ if line.registrierkasse_receipt_number:
+                        line.rksv_state = 'signed'
+                    case 'draft':
+                            line.rksv_state = 'pending'
+                    case 'cancel':
+                        line.rksv_state = 'cancel'
+                    case _:
+                        line.rksv_state = 'not_signed'
+            else:
+                line.rksv_state = None
+
     @api.model
     def _get_rksv_signature(self, config, order_vals, is_refund=False):
         """Helper method to perform RKSV signing."""
-        if "sum_total_rksv" in order_vals:
-            config.revenue_counter += order_vals.get('sum_total_rksv', 0.0) * 100.0
+        if order_vals.keys() >= {"sum_vat_normal", "sum_vat_discounted_1", "sum_vat_discounted_2", "sum_vat_null", "sum_vat_special"}:
+            config.revenue_counter += (
+                order_vals.get("sum_vat_normal", 0.0) * 100.0
+                + order_vals.get("sum_vat_discounted_1", 0.0) * 100.0
+                + order_vals.get("sum_vat_discounted_2", 0.0) * 100.0
+                + order_vals.get("sum_vat_null", 0.0) * 100.0
+                + order_vals.get("sum_vat_special", 0.0) * 100.0
+            )
         else:
-            raise UserError(_("This order was created before activating RKSV."))
+            raise UserError(_("Singing failed. This order was probably created before activating RKSV."))
 
         receipt_number = int(config.receipt_sequence_id.next_by_id())
 
@@ -112,7 +142,7 @@ class CustomPOSOrder(models.Model):
         }
 
     @api.model
-    def _compute_rksv_sums(self, lines):
+    def _calculate_rksv_sums(self, lines):
         sums = {
             'sum_vat_normal': 0.0,
             'sum_vat_discounted_1': 0.0,
@@ -162,6 +192,9 @@ class CustomPOSOrder(models.Model):
     def sign_order(self):
         self = self.sorted(key='date_order')
         for order in self:
+            if order.rksv_state not in {'not_signed', 'pending'}:
+                continue  # Signing not neccessary
+            # Following checks are just safety guards - all these conditions should have a different rksv_state...
             if order.registrierkasse_receipt_number:
                 continue  # Already signed
             if not order.session_id.config_id.pos_use_registrierkasse:
@@ -170,7 +203,7 @@ class CustomPOSOrder(models.Model):
                 continue  # Only confirmed ordered can be signed
 
             # Calculate sums from existing order lines
-            sums = self._compute_rksv_sums(order.lines)
+            sums = self._calculate_rksv_sums(order.lines)
 
             # Check is_refund
             is_refund = True
@@ -202,38 +235,6 @@ class CustomPOSOrder(models.Model):
             order.write({'pos_reference': new_ref})
 
         return order_id
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            session = self.env['pos.session'].browse(vals['session_id'])
-            if session.config_id.pos_use_registrierkasse:
-                _logger.debug("Got state %s", vals.get('state'))
-                match vals.get('state', 'draft'):
-                    case _ if vals.get('registrierkasse_receipt_number'):
-                        vals['rksv_state'] = 'signed'
-                    case 'draft':
-                        vals['rksv_state'] = 'pending'
-                    case 'cancel':
-                        vals['rksv_state'] = 'cancel'
-                    case _:
-                        vals['rksv_state'] = 'not_signed'
-            else:
-                vals['rksv_state'] = None
-        return super().create(vals_list)
-
-    def write(self, vals):
-        for order in self:
-            _logger.debug("Setting fields of order %s: %s", order.id, vals)
-            if vals.get('registrierkasse_receipt_number'):
-                vals['rksv_state'] = 'signed'
-            elif not order.registrierkasse_receipt_number and order.config_id.pos_use_registrierkasse:
-                match vals.get('state'):
-                    case 'cancel':
-                        vals['rksv_state'] = 'cancel'
-                    case 'paid' | 'done' | 'invoiced':
-                        vals['rksv_state'] = 'not_signed'
-        return super().write(vals)
 
     def unlink(self):
         """Prevent deletion of RKSV-signed orders."""

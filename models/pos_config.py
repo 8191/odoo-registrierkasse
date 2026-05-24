@@ -393,14 +393,27 @@ class CustomPOSConfig(models.Model):
         """Helper to create a null POS order for RKSV."""
         order = self.env['pos.order'].create({
             'date_order': order_date_obj,
-            'amount_total': 0, 'amount_tax': 0, 'amount_paid': 0, 'amount_return': 0,
-            'lines': [(0, 0, {'product_id': self._get_null_product().product_variant_id.id,
-                              'price_unit': 0, 'price_subtotal': 0, 'price_subtotal_incl': 0, 'qty': 1})],
+            'amount_total': 0,
+            'amount_tax': 0,
+            'amount_paid': 0,
+            'amount_return': 0,
+            'lines': [(0, 0, {
+                'product_id': self._get_null_product().product_variant_id.id,
+                'price_unit': 0,
+                'price_subtotal': 0,
+                'price_subtotal_incl': 0,
+                'qty': 1
+            })],
             'session_id': pos_session.id,
             'company_id': pos_config_rec.company_id.id or self.env.company.id,
             'registrierkasse_receipt_number': receipt_num,
             'certificate_serial_number': pos_config_rec.certificate_serial_number,
             'prev_order_signature': prev_signature_hash_for_order_field,
+            'sum_vat_normal': 0,
+            'sum_vat_discounted_1': 0,
+            'sum_vat_discounted_2': 0,
+            'sum_vat_null': 0,
+            'sum_vat_special': 0,
             'pos_reference': f"{_('RKSV Null Receipt')} {pos_session.id:05d}-{order_sequence_in_session:03d}-{int(receipt_num):04d}",
             'general_note': general_note,
             'state': 'done'

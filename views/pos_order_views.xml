@@ -22,7 +22,7 @@
                 <field name="registrierkasse_receipt_number" invisible="not registrierkasse_receipt_number" optional="hide" groups="base.group_no_one"/>
             </field>
             <field name="amount_total" position="after">
-                <field name="sum_total_rksv" sum="Amount total" widget="monetary" invisible="rksv_state != 'signed'" optional="hide" groups="base.group_no_one"/>
+                <field name="sum_total_rksv" sum="Amount total" widget="monetary" invisible="rksv_state != 'signed' and not sum_total_rksv" optional="hide" groups="base.group_no_one"/>
             </field>
             <field name="state" position="after">
                 <field name="rksv_state" widget="badge" optional="hide"
@@ -38,16 +38,17 @@
         <field name="arch" type="xml">
             <field name="failed_pickings" position="before">
                 <widget name="web_ribbon" title="Not Signed" bg_color="bg-danger" invisible="rksv_state != 'not_signed'"/>
+                <widget name="web_ribbon" title="Signed" bg_color="bg-success" invisible="rksv_state != 'signed'"/>
             </field>
             <xpath expr="//page[@name='extra']/group" position="inside">
                 <group string="Cash Register" invisible="not rksv_state" groups="base.group_no_one">
                     <field name="rksv_state" string="Signature Status" decoration-success="rksv_state == 'signed'" decoration-danger="rksv_state == 'not_signed'"/>
                     <field name="registrierkasse_receipt_number" invisible="not registrierkasse_receipt_number"/>
-                    <field string="VAT Normal" name="sum_vat_normal" widget="monetary" invisible="not registrierkasse_receipt_number"/>
-                    <field string="VAT Discounted 1" name="sum_vat_discounted_1" widget="monetary" invisible="not registrierkasse_receipt_number"/>
-                    <field string="VAT Discounted 2" name="sum_vat_discounted_2" widget="monetary" invisible="not registrierkasse_receipt_number"/>
-                    <field string="VAT Null" name="sum_vat_null" widget="monetary" invisible="not registrierkasse_receipt_number"/>
-                    <field string="VAT Special" name="sum_vat_special" widget="monetary" invisible="not registrierkasse_receipt_number"/>
+                    <field string="VAT Normal" name="sum_vat_normal" widget="monetary"/>
+                    <field string="VAT Discounted 1" name="sum_vat_discounted_1" widget="monetary"/>
+                    <field string="VAT Discounted 2" name="sum_vat_discounted_2" widget="monetary"/>
+                    <field string="VAT Null" name="sum_vat_null" widget="monetary"/>
+                    <field string="VAT Special" name="sum_vat_special" widget="monetary"/>
                     <field string="Total Sum" name="sum_total_rksv" widget="monetary" invisible="not registrierkasse_receipt_number"/>
                 </group>
             </xpath>

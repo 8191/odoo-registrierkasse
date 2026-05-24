@@ -25,7 +25,7 @@ patch(PaymentScreen.prototype, {
                 const order = this.currentOrder;
                 order.recomputeOrderData()
                 /****
-                 * Keep logic in sync with pos.order#_compute_rksv_sums
+                 * Keep logic in sync with pos.order#_calculate_rksv_sums
                  ****/
                 order.lines.forEach(function (line) {
                     const lineAmount = line.get_price_with_tax();
@@ -58,7 +58,6 @@ patch(PaymentScreen.prototype, {
                 order.sum_vat_discounted_2 = sum_vat_discounted_2;
                 order.sum_vat_null = sum_vat_null;
                 order.sum_vat_special = sum_vat_special;
-                order.sum_total_rksv = sum_vat_normal + sum_vat_discounted_1 + sum_vat_discounted_2 + sum_vat_null + sum_vat_special;
 
                 const signature = await this.pos.data.call("pos.order", "sign_order_from_ui", [order.serialize(), isRefund]);
                 order.certificate_serial_number = signature.certificate_serial_number
