@@ -21,12 +21,12 @@ class CustomPOSOrder(models.Model):
     certificate_serial_number = fields.Char('Serial number of the certificate', readonly=True, copy=False)
     registrierkasse_receipt_number = fields.Integer('Sequence of receipt specific to RKSV', readonly=True, copy=False, index=True)
 
-    sum_vat_normal = fields.Float('RKSV VAT Normal', digits=(16, 2), readonly=True, copy=False, required=True, help="VAT 20%")
-    sum_vat_discounted_1 = fields.Float('RKSV VAT Discounted 1', digits=(16, 2), copy=False, readonly=True, required=True, help="VAT 10%")
-    sum_vat_discounted_2 = fields.Float('RKSV VAT Discounted 2', digits=(16, 2), copy=False, readonly=True, required=True, help="VAT 13%")
-    sum_vat_null = fields.Float('RKSV VAT Null', digits=(16, 2), copy=False, readonly=True, required=True, help="VAT 0%")
-    sum_vat_special = fields.Float('RKSV VAT Special', digits=(16, 2), copy=False, readonly=True, required=True)
-    sum_total_rksv = fields.Float('RKSV Total Sum', digits=(16, 2), copy=False, readonly=True, required=True)
+    sum_vat_normal = fields.Float('RKSV VAT Normal', digits=(16, 2), copy=False, readonly=True, help="VAT 20%")
+    sum_vat_discounted_1 = fields.Float('RKSV VAT Discounted 1', digits=(16, 2), copy=False, readonly=True, help="VAT 10%")
+    sum_vat_discounted_2 = fields.Float('RKSV VAT Discounted 2', digits=(16, 2), copy=False, readonly=True, help="VAT 13%")
+    sum_vat_null = fields.Float('RKSV VAT Null', digits=(16, 2), copy=False, readonly=True, help="VAT 0%")
+    sum_vat_special = fields.Float('RKSV VAT Special', digits=(16, 2), copy=False, readonly=True)
+    sum_total_rksv = fields.Float('RKSV Total Sum', digits=(16, 2), copy=False, readonly=True)
 
     rksv_state = fields.Selection(
         [('pending', 'Pending'), ('signed', 'Signed'), ('not_signed', 'Not signed'), ('cancel', 'Cancelled')],
@@ -200,6 +200,7 @@ class CustomPOSOrder(models.Model):
         for vals in vals_list:
             session = self.env['pos.session'].browse(vals['session_id'])
             if session.config_id.pos_use_registrierkasse:
+                _logger.debug("Got state %s", vals.get('state'))
                 match vals.get('state', 'draft'):
                     case _ if vals.get('registrierkasse_receipt_number'):
                         vals['rksv_state'] = 'signed'
@@ -215,6 +216,7 @@ class CustomPOSOrder(models.Model):
 
     def write(self, vals):
         for order in self:
+            _logger.debug("Setting fields of order %s: %s", order.id, vals)
             if vals.get('registrierkasse_receipt_number'):
                 vals['rksv_state'] = 'signed'
             elif not order.registrierkasse_receipt_number and order.config_id.pos_use_registrierkasse:
