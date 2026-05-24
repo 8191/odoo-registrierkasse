@@ -164,7 +164,8 @@ class CustomPOSConfig(models.Model):
         self._register_pos_and_verify_starting_receipt(order, pos_config_rec, certificate_serial_number_binary)
 
         # Step 5: Close Session
-        pos_session.write({'state': 'closed', 'stop_at': fields.Datetime.now()})
+        pos_session.stop_at = fields.Datetime.now()
+        pos_session.action_pos_session_close()
 
     def _register_pos_and_verify_starting_receipt(self, order, pos_config_rec, certificate_serial_number_binary):
         if not self.env['ir.config_parameter'].get_param('pos_registrierkasse.fon_active'):
@@ -244,7 +245,7 @@ class CustomPOSConfig(models.Model):
                 prev_order_jws_hash_for_chaining  # Previous hash for JWS payload
             )
             _logger.info(
-                f"RKSV: Monthly receipt (Order ID: {order.id}) for POS '{self.name}' signed.")
+                f"RKSV: Null receipt (Order ID: {order.id}) for POS '{self.name}' signed.")
 
             # Step 3: If it's the end of the year, send the Jahresbeleg to FinanzOnline
             if fon_submit and self.env['ir.config_parameter'].get_param('pos_registrierkasse.fon_active'):
@@ -269,9 +270,10 @@ class CustomPOSConfig(models.Model):
             return None
         finally:
             if (pos_session and pos_session.exists()
-                    and pos_session.opening_notes == _("Monthly Null Receipt Session")
+                    and pos_session.opening_notes == _("Null Receipt Session")
                     and pos_session.state != 'closed'):
-                pos_session.write({'state': 'closed', 'stop_at': fields.Datetime.now()})
+                pos_session.stop_at = fields.Datetime.now()
+                pos_session.action_pos_session_close()
                 _logger.info(f"RKSV: Closed POS Session (ID: {pos_session.id})")
 
     def _setup_cron_job(self):
