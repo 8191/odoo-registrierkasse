@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-24 15:43+0000\n"
-"PO-Revision-Date: 2026-05-24 17:49+0200\n"
+"POT-Creation-Date: 2026-05-24 19:23+0000\n"
+"PO-Revision-Date: 2026-05-24 21:27+0200\n"
 "Last-Translator: Manuel Faux <mfaux@conf.at>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -365,6 +365,11 @@ msgid "Provide a reason for the null receipt."
 msgstr "Grund für die Erstellung eines Nullbelegs."
 
 #. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
+msgid "RKSV Active"
+msgstr "Registrierkasse aktiv"
+
+#. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
 msgid "RKSV Compliance"
 msgstr "RKSV Konformität"
@@ -395,6 +400,11 @@ msgstr "Registrierkassen-Einstellungen"
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__rksv_state
 msgid "RKSV Status"
 msgstr "Registrierkassenstatus"
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
+msgid "RKSV Test"
+msgstr "RKSV Test-Umgebung"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__sum_total_rksv
@@ -438,6 +448,11 @@ msgid "Retry Signing"
 msgstr "Signieren erneut versuchen"
 
 #. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_order_tree_registrierkasse
+msgid "Retry Signing All"
+msgstr "Alle Signieren"
+
+#. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
 msgid "Revenue Counter"
 msgstr "Umsatzzähler"
@@ -450,8 +465,8 @@ msgid ""
 "and order date was changed accordingly."
 msgstr ""
 "Sicherheitseinrichtung war zum Zeitpunkt der Zahlung ausgefallen. Die RKSV-"
-"Signatur wurde nachträglich hinzugefügt, und das Auftragsdatum wurde "
-"entsprechend geändert."
+"Signatur wurde nachträglich hinzugefügt und das Auftragsdatum entsprechend "
+"geändert."
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__registrierkasse_receipt_number
@@ -532,6 +547,30 @@ msgid "The name of the POS must be unique!"
 msgstr "Der Name des POS muss eindeutig sein!"
 
 #. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
+msgid ""
+"There are unsigned orders from this PoS. This happens when the RKSV signing "
+"provider is not available at time of payment."
+msgstr ""
+"Es liegen nicht signierte Bestellungen von diesem Kassensystem vor. Dies "
+"geschieht, wenn die Verbindung zum RKSV-Signaturdienst zum Zeitpunkt der "
+"Zahlung nicht verfügbar ist."
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
+msgid "This PoS is operating as an Austrian Cash Register according to RKSV."
+msgstr ""
+"Dieses Kassensystem wird als österreichische Registrierkasse gemäß RKSV "
+"betrieben."
+
+#. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
+msgid "This PoS uses a test environment of the Austrian Cash Register."
+msgstr ""
+"Dieses Kassensystem nutzt eine Testumgebung der österreichischen "
+"Registrierkasse."
+
+#. module: pos_registrierkasse
 #. odoo-python
 #: code:addons/pos_registrierkasse/wizard/pos_create_null_receipt.py:0
 msgid "This function is only available for PoS with enabled RKSV."
@@ -568,6 +607,18 @@ msgstr "AES Schlüssel für Umsatzzähler"
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__registrierkasse_aes_key_checksum
 msgid "Umsatzzähler AES Prüfsumme"
 msgstr "AES Schlüssel Prüfsumme"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__unsigned_order_ids
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
+msgid "Unsigned Orders"
+msgstr "Nicht signierte Aufträge"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid "Unsigned Orders of %s"
+msgstr "Nicht signierte Aufträge von %s"
 
 #. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
@@ -618,6 +669,20 @@ msgstr "USt Nullsteuer"
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
 msgid "VAT Special"
 msgstr "USt Sondersteuer"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid "You need to specify a A-Trust password for a RKSV compliant POS"
+msgstr ""
+"Sie müssen ein A-Trust-Passwort für ein RKSV-konformes Kassensystem angeben"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid "You need to specify a A-Trust user for a RKSV compliant POS"
+msgstr ""
+"Sie müssen einen A-Trust-Benutzer für ein RKSV-konformes Kassensystem angeben"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__certificate_certification_body
