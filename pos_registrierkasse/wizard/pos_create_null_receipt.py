@@ -1,10 +1,5 @@
-import logging
-
 from odoo import fields, models, _
 from odoo.api import UserError
-
-
-_logger = logging.getLogger(__name__)
 
 
 class PosCreateNullReceiptWizard(models.TransientModel):
@@ -12,14 +7,28 @@ class PosCreateNullReceiptWizard(models.TransientModel):
     _description = 'Creates a null receipt in the RSKV register'
 
     def _default_config(self):
-        config_id = self.env.context.get('active_id')
-        if config_id:
-            _logger.debug("Context %s", config_id)
-            return self.env['pos.config'].browse(config_id)
+        match self.env.context.get('active_model'):
+            case 'pos.order':
+                order_id = self.env.context.get('active_id')
+                if order_id:
+                    order = self.env['pos.order'].browse(order_id)
+                    if order.exists() and order.config_id:
+                        return order.config_id
+            case 'pos.config':
+                config_id = self.env.context.get('active_id')
+                if config_id:
+                    return self.env['pos.config'].browse(config_id)
         return False
 
+    def _default_description(self):
+        description = "Temporary malfunction of the safety device has been resolved."
+        if self.env.context.get('active_model') == "pos.order" and self.env.context.get('signed_order_ids'):
+            orders = self.env['pos.order'].browse(self.env.context.get('signed_order_ids'))
+            description += "\n\nCollective null receipt for following orders:\n" + "\n".join(o.pos_reference for o in orders)
+        return description
+
     config_id = fields.Many2one('pos.config', string='Point of Sale Configuration', required=True, default=_default_config)
-    description = fields.Text("Description", help="Provide a reason for the null receipt.")
+    description = fields.Text("Description", help="Provide a reason for the null receipt.", default=_default_description)
 
     def create_receipt(self):
         if not self.config_id.pos_use_registrierkasse:
