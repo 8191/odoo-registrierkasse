@@ -251,11 +251,14 @@ class CustomPOSOrder(models.Model):
     def action_retry_signing(self):
         """Manually retry signing the order."""
         if not self and self.env.context.get('purpose') == 'view_unsigned_orders':
+            # Bulk sign unsigned orders (from view pos.config.action_view_unsigned_orders)
             active_domain = self.env.context.get('active_domain')
             if type(active_domain) is list:
                 self = self.search(active_domain)
         if len(self.config_id) > 1:
             raise UserError(_("Only orders from the same PoS can be signed simultaneously."))
+        if any(s.state != 'closed' for s in self.env['pos.order'].browse(self.ids).session_id):
+            raise UserError(_("Please close related sessions of PoS '%s' before.", self.config_id.name))
         signed_orders = self.sign_order()
         if signed_orders:
             action = self.config_id.action_create_nullreceipt()
