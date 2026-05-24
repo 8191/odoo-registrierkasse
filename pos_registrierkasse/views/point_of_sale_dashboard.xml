@@ -18,6 +18,26 @@
                         </div>
                     </div>
                 </xpath>
+                <field name="currency_id" position="after">
+                    <field name="pos_use_registrierkasse"/>
+                    <field name="a_trust_environment"/>
+                    <field name="unsigned_order_ids"/>
+                </field>
+                <field name="current_user_id" position="replace">
+                    <div class="row g-0 pb-0 ms-2 mt-auto">
+                        <div class="col-11">
+                            <div t-if="record.pos_use_registrierkasse.raw_value and record.a_trust_environment.raw_value == 'production'" class="text-success fw-bold"
+                                    title="This PoS is operating as an Austrian Cash Register according to RKSV.">RKSV Active</div>
+                            <div t-if="record.pos_use_registrierkasse.raw_value and record.a_trust_environment.raw_value != 'production'" class="text-warning fw-bold"
+                                    title="This PoS uses a test environment of the Austrian Cash Register.">RKSV Test</div>
+                            <div t-if="record.unsigned_order_ids.raw_value > 0" class="badge text-bg-danger"
+                                    title="There are unsigned orders from this PoS. This happens when the RKSV signing provider is not available at time of payment.">
+                                <a name="action_view_unsigned_orders" type="object" class="text-white">Unsigned Orders</a>
+                            </div>
+                        </div>
+                        <field name="current_user_id" widget="many2one_avatar_user" class="mt-auto ms-auto col-1"/>
+                    </div>
+                </field>
             </field>
         </record>
     </data>

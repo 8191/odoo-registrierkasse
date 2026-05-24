@@ -18,6 +18,11 @@
         <field name="model">pos.order</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
         <field name="arch" type="xml">
+            <field name="currency_id" position="before">
+                <header>
+                    <button name="action_retry_signing" type="object" string="Retry Signing All" display="always" invisible="context.get('purpose') != 'view_unsigned_orders'"/>
+                </header>
+            </field>
             <field name="name" position="after">
                 <field name="registrierkasse_receipt_number" invisible="not registrierkasse_receipt_number" optional="hide" groups="base.group_no_one"/>
             </field>
