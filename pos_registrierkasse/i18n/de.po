@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-24 09:18+0000\n"
-"PO-Revision-Date: 2026-05-24 11:19+0200\n"
+"POT-Creation-Date: 2026-05-24 15:43+0000\n"
+"PO-Revision-Date: 2026-05-24 17:49+0200\n"
 "Last-Translator: Manuel Faux <mfaux@conf.at>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -133,7 +133,8 @@ msgid "Create"
 msgstr "Erstellen"
 
 #. module: pos_registrierkasse
-#: model:ir.actions.act_window,name:pos_registrierkasse.action_create_nullreceipt
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.pos_create_null_receipt_wizard
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
 msgid "Create Null Receipt"
@@ -283,12 +284,6 @@ msgstr "Fehlende Signatur durch Registrierkasse"
 #. module: pos_registrierkasse
 #. odoo-python
 #: code:addons/pos_registrierkasse/models/pos_config.py:0
-msgid "Monthly Null Receipt Session"
-msgstr "Monatliche Nullbeleg Sitzung"
-
-#. module: pos_registrierkasse
-#. odoo-python
-#: code:addons/pos_registrierkasse/models/pos_config.py:0
 msgid "Monthly RKSV Null Receipt"
 msgstr "Monatlicher RKSV Nullbeleg"
 
@@ -313,6 +308,13 @@ msgstr "Monatliche Nullbeleg Sitzung"
 #: code:addons/pos_registrierkasse/wizard/pos_create_null_receipt.py:0
 msgid "Null receipt could not be created."
 msgstr "Nullbeleg konnte nicht erstellt werden."
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_order.py:0
+msgid "Only orders from the same PoS can be signed simultaneously."
+msgstr ""
+"Es können nur Aufträge des selben Kassensystems gleichzeitig signiert werden."
 
 #. module: pos_registrierkasse
 #. odoo-python
@@ -441,6 +443,17 @@ msgid "Revenue Counter"
 msgstr "Umsatzzähler"
 
 #. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_order.py:0
+msgid ""
+"Security device failed at time of payment. RKSV signature was added delayed "
+"and order date was changed accordingly."
+msgstr ""
+"Sicherheitseinrichtung war zum Zeitpunkt der Zahlung ausgefallen. Die RKSV-"
+"Signatur wurde nachträglich hinzugefügt, und das Auftragsdatum wurde "
+"entsprechend geändert."
+
+#. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__registrierkasse_receipt_number
 msgid "Sequence of receipt specific to RKSV"
 msgstr "RKSV Belegnummer"
@@ -478,6 +491,7 @@ msgstr "Signaturzertifikat"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_order__rksv_state__signed
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
 msgid "Signed"
 msgstr "Signiert"
 
@@ -486,6 +500,14 @@ msgstr "Signiert"
 #: code:addons/pos_registrierkasse/models/pos_order.py:0
 msgid "Signing failed: %s"
 msgstr "Signierung fehlgeschlagen: %s"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_order.py:0
+msgid "Singing failed. This order was probably created before activating RKSV."
+msgstr ""
+"Signieren Fehlgeschlagen. Dieser Auftrag wurde möglicherweise vor der "
+"Aktivierung der RKSV Registrierkasse erstellt."
 
 #. module: pos_registrierkasse
 #. odoo-python
@@ -516,13 +538,6 @@ msgid "This function is only available for PoS with enabled RKSV."
 msgstr ""
 "Diese Funktion ist nur für Kassensysteme mit aktiver RKSV Registrierkasse "
 "verfügbar."
-
-#. module: pos_registrierkasse
-#. odoo-python
-#: code:addons/pos_registrierkasse/models/pos_order.py:0
-msgid "This order was created before activating RKSV."
-msgstr ""
-"Dieser Auftrag wurde vor der Aktivierung der RKSV Registrierkasse erstellt."
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,help:pos_registrierkasse.field_pos_config__receipt_sequence_id
@@ -608,36 +623,3 @@ msgstr "USt Sondersteuer"
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__certificate_certification_body
 msgid "Zertifizierungsstellen for Beleg Gruppe"
 msgstr "Zertifizierungsstellen"
-
-#. module: pos_registrierkasse
-#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
-msgid "e.g. NYC Shop"
-msgstr "z.B. NYC Shop"
-
-#~ msgid "Null Receipt"
-#~ msgstr "Nullbeleg"
-
-#~ msgid "Automatic Null Receipt booking from RKSV"
-#~ msgstr "Automatische Nullbeleg Buchung der Registrierkasse"
-
-#~ msgid ""
-#~ "Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann "
-#~ "nicht gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung."
-#~ msgstr ""
-#~ "Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann "
-#~ "nicht gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung."
-
-#~ msgid "RKSV Signed"
-#~ msgstr "Signiert durch Registrierkasse"
-
-#~ msgid "The whole code sent to A-Trust"
-#~ msgstr "Maschinenlesbarer Code"
-
-#~ msgid "Logo"
-#~ msgstr "Logo"
-
-#~ msgid "Total"
-#~ msgstr "Umsatzzähler"
-
-#~ msgid "and"
-#~ msgstr "und"
