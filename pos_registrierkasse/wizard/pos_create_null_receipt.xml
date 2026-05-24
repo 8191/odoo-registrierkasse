@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <form string="Create Null Receipt">
                 <group>
+                    <field name="config_id" readonly="1"/>
                     <field name="description"/>
                 </group>
                 <footer>
@@ -14,11 +15,5 @@
                 </footer>
             </form>
         </field>
-    </record>
-    <record id="action_create_nullreceipt" model="ir.actions.act_window">
-        <field name="name">Create Null Receipt</field>
-        <field name="res_model">pos.nullreceipt.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
     </record>
 </odoo>

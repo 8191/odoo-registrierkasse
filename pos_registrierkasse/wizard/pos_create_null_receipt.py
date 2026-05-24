@@ -1,5 +1,10 @@
+import logging
+
 from odoo import fields, models, _
 from odoo.api import UserError
+
+
+_logger = logging.getLogger(__name__)
 
 
 class PosCreateNullReceiptWizard(models.TransientModel):
@@ -7,9 +12,10 @@ class PosCreateNullReceiptWizard(models.TransientModel):
     _description = 'Creates a null receipt in the RSKV register'
 
     def _default_config(self):
-        active_id = self.env.context.get('active_id')
-        if active_id:
-            return self.env['pos.order'].browse(active_id).session_id.config_id
+        config_id = self.env.context.get('active_id')
+        if config_id:
+            _logger.debug("Context %s", config_id)
+            return self.env['pos.config'].browse(config_id)
         return False
 
     config_id = fields.Many2one('pos.config', string='Point of Sale Configuration', required=True, default=_default_config)

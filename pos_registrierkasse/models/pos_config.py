@@ -352,6 +352,16 @@ class CustomPOSConfig(models.Model):
             'target': 'self',
         }
 
+    def action_create_nullreceipt(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Create Null Receipt"),
+            'res_model': 'pos.nullreceipt.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
     def _rksv_create_pos_session(self, pos_config_rec, opening_notes):
         """
         Checks whether there is already an open POS sessions for the given config.
