@@ -56,7 +56,7 @@ class CertificateInformation:
     certificate_serial_number: str
     certificate_serial_number_binary: str
     signature_certificate: str
-    certification_body: [str]
+    certification_body: list[str]
 
 
 class ATrustProvider(ABC):
@@ -139,6 +139,9 @@ class ATrustProdProvider(ATrustProvider):
 
 
 class ATrustMockProvider(ATrustProvider):
+    def __init__(self, success=True):
+        self._success = success
+
     def login(self, user):
         return SessionData('mock_session_key', 'mock_session_id')
 
@@ -146,7 +149,10 @@ class ATrustMockProvider(ATrustProvider):
         return True
 
     def create_signature(self, session, machine_readable_code):
-        return "mock_signature_string"
+        if self._success:
+            return "mock_signature_string"
+        else:
+            raise PermissionError("Signing failed")
 
     def get_certificate_information(self, username):
         return CertificateInformation(
@@ -157,10 +163,12 @@ class ATrustMockProvider(ATrustProvider):
         )
 
 
-def get_atrust_api(env):
+def get_atrust_api(env: str):
     match env:
         case 'test':
             return ATrustMockProvider()
+        case 'test_fail':
+            return ATrustMockProvider(False)
         case 'qa':
             return ATrustProdProvider("https://hs-abnahme.a-trust.at/asignrkonline/v2")
         case _:
