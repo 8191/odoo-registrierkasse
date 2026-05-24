@@ -7,20 +7,15 @@
             <field name="model">pos.config</field>
             <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@id='title']" position="replace">
-                    <div class="oe_title" id="title">
-                        <label for="name"/>
-                        <h1>
-                            <field name="name" placeholder="e.g. NYC Shop" readonly="pos_rksv_lock"/>
-                        </h1>
-                    </div>
-                </xpath>
-                <xpath expr="//div[@id='title']" position="after">
+                <field name="name" position="attributes" readonly="pos_rksv_lock">
+                    <attribute name="readonly">pos_rksv_lock</attribute>
+                </field>
+                <div id="restaurant_on_create" position="after">
                     <div title="RKSV Settings" class="row mt16 o_settings_container">
                         <setting id="rksv_compliance" string="RKSV Compliance"
                                  help="Make this POS RKSV compliant">
                             <field name="pos_use_registrierkasse"
-                                   readonly="pos_rksv_lock"/>
+                                   readonly="pos_rksv_lock or has_active_session"/>
                             <div class="content-group" invisible="not pos_use_registrierkasse">
                                 <div class="row mt16">
                                     <label for="registrierkasse_aes_key" string="AES Key for Revenue Counter"
@@ -59,7 +54,7 @@
                             <field name="pos_rksv_lock" invisible="1"/>
                         </setting>
                     </div>
-                </xpath>
+                </div>
             </field>
         </record>
 
