@@ -55,11 +55,11 @@ class CustomPOSConfig(models.Model):
     def _get_finanz_online_credentials(self):
         get_param = self.env['ir.config_parameter'].get_param
         return FinanzOnlineCredentials(
-            tid=get_param('pos_registrierkasse.fon_tid'),
-            benid=get_param('pos_registrierkasse.fon_benid'),
-            pin=get_param('pos_registrierkasse.fon_pin'),
-            herstellerid=get_param('pos_registrierkasse.fon_herstellerid'),
-            env=get_param('pos_registrierkasse.fon_environment', 'test')
+            tid=str(get_param('pos_registrierkasse.fon_tid')),
+            benid=str(get_param('pos_registrierkasse.fon_benid')),
+            pin=str(get_param('pos_registrierkasse.fon_pin')),
+            herstellerid=str(get_param('pos_registrierkasse.fon_herstellerid')),
+            env=str(get_param('pos_registrierkasse.fon_environment', 'test'))
         )
 
     def copy(self, default=None):
@@ -154,7 +154,7 @@ class CustomPOSConfig(models.Model):
 
         order = self._rksv_create_null_order(
             pos_config_rec, pos_session, receipt_num, order_date_obj,
-            initial_prev_order_sig_hash, 1, _('RKSV Opening Receipt'))
+            initial_prev_order_sig_hash, 1, _('RKSV Opening Receipt'), _('RKSV Opening Receipt'))
         order.action_pos_order_paid()
 
         # Step 3: Perform RKSV Signing
@@ -410,7 +410,7 @@ class CustomPOSConfig(models.Model):
 
     def _rksv_create_null_order(self, pos_config_rec, pos_session, receipt_num, order_date_obj,
                                 prev_signature_hash_for_order_field, order_sequence_in_session,
-                                general_note):
+                                general_note, pos_reference_prefix=None):
         """Helper to create a null POS order for RKSV."""
         order = self.env['pos.order'].create({
             'date_order': order_date_obj,
@@ -435,7 +435,7 @@ class CustomPOSConfig(models.Model):
             'sum_vat_discounted_2': 0,
             'sum_vat_null': 0,
             'sum_vat_special': 0,
-            'pos_reference': f"{_('RKSV Null Receipt')} {pos_session.id:05d}-{order_sequence_in_session:03d}-{int(receipt_num):04d}",
+            'pos_reference': f"{pos_reference_prefix or _('RKSV Null Receipt')} {pos_session.id:05d}-{order_sequence_in_session:03d}-{int(receipt_num):04d}",
             'general_note': general_note,
             'state': 'done'
         })
