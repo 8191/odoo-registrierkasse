@@ -2,6 +2,7 @@ import logging
 
 from odoo import api, models, fields, _
 from odoo.exceptions import UserError
+from odoo.tools import float_compare
 
 from .libs.a_trust.a_trust_library import SessionData, OrderData, LoginData
 from .utils.order_utils import chain_hash, format_order_date
@@ -31,6 +32,13 @@ class CustomPOSOrder(models.Model):
     rksv_state = fields.Selection(
         [('pending', 'Pending'), ('signed', 'Signed'), ('not_signed', 'Not signed'), ('cancel', 'Cancelled')],
         'RKSV Status', readonly=True, copy=False)
+
+    @api.depends('lines.refunded_qty', 'lines.qty')
+    def _compute_has_refundable_lines(self):
+        digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        for order in self:
+            # Don't allow to refund null product orders (see also CustomPOSConfig._get_null_product)
+            order.has_refundable_lines = any([float_compare(line.qty, line.refunded_qty, digits) > 0 and not (line.product_id.type == 'service' and line.price_unit == 0) for line in order.lines])
 
     @api.model
     def _get_rksv_signature(self, config, order_vals, is_refund=False):

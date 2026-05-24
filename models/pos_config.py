@@ -209,6 +209,70 @@ class CustomPOSConfig(models.Model):
             _logger.error(f"RKSV: Unexpected error during FinanzOnline setup for '{pos_config_rec.name}': {e}", exc_info=True)
             raise UserError(f"Unexpected error during FinanzOnline setup: {e}")
 
+    def create_null_receipt(self, description, *, fon_submit=False):
+        if not self.exists() or not self.pos_use_registrierkasse:
+            _logger.warning(f"RKSV: Attempted to run for non-existent or non-RKSV POS config (ID: {self.id}). Aborting.")
+            return None
+
+        _logger.info(f"RKSV: Processing POS Config '{self.name}' (ID: {self.id})")
+        pos_session = None
+        try:
+            # Step 1: Create Session & Order
+            pos_session = self._rksv_create_pos_session(self, _("Null Receipt Session"))
+            receipt_num = int(self.receipt_sequence_id.next_by_id())
+            order_date_obj = fields.Datetime.now()
+
+            prev_rksv_order = self.env['pos.order'].search([
+                ('config_id', '=', self.id),
+                ('registrierkasse_receipt_number', '=', int(receipt_num) - 1),
+                ('state', 'in', ['paid', 'done', 'invoiced'])
+            ], limit=1, order='registrierkasse_receipt_number desc, id desc')
+            prev_order_jws_hash_for_chaining = chain_hash(prev_rksv_order)
+
+            order_sequence_in_session = self.env['pos.order'].search_count([('session_id', '=', pos_session.id)]) + 1
+
+            order = self._rksv_create_null_order(
+                self, pos_session, receipt_num, order_date_obj,
+                prev_order_jws_hash_for_chaining, order_sequence_in_session, description)
+            order.action_pos_order_paid()
+
+            # Step 2: Perform RKSV Signing
+            self._rksv_perform_order_signing(
+                self, order,
+                self.revenue_counter,  # Prospective revenue for encryption
+                prev_order_jws_hash_for_chaining  # Previous hash for JWS payload
+            )
+            _logger.info(
+                f"RKSV: Monthly receipt (Order ID: {order.id}) for POS '{self.name}' signed.")
+
+            # Step 3: If it's the end of the year, send the Jahresbeleg to FinanzOnline
+            if fon_submit and self.env['ir.config_parameter'].get_param('pos_registrierkasse.fon_active'):
+                _logger.info(f"RKSV: Jahresbeleg for '{self.name}'. Sending to FinanzOnline.")
+                credentials = self._get_finanz_online_credentials()
+                try:
+                    with FinanzOnlineClient(credentials) as client:
+                        _logger.info(f"RKSV: Verifying Jahresbeleg for '{self.name}' with FinanzOnline.")
+                        if client.verify_receipt(
+                            customer_info=self.company_id.name,
+                            receipt_data=order.machine_readable_code + "_" + base64url_to_base64(order.order_signature),
+                            transmission_type='T' if credentials.env == 'test' else 'P'
+                        ):
+                            _logger.info(f"RKSV: Jahresbeleg for '{self.name}' sent successfully to FinanzOnline.")
+                        else:
+                            _logger.error(f"RKSV: Failed to send Jahresbeleg for '{self.name}' to FinanzOnline.")
+                except Exception as e:
+                    _logger.error(f"RKSV: Error sending Jahresbeleg for '{self.name}' to FinanzOnline: {e}", exc_info=True)
+            return order
+        except Exception as e:
+            _logger.error(f"RKSV: Error processing POS Config '{self.name}': {e}", exc_info=True)
+            return None
+        finally:
+            if (pos_session and pos_session.exists()
+                    and pos_session.opening_notes == _("Monthly Null Receipt Session")
+                    and pos_session.state != 'closed'):
+                pos_session.write({'state': 'closed', 'stop_at': fields.Datetime.now()})
+                _logger.info(f"RKSV: Closed POS Session (ID: {pos_session.id})")
+
     def _setup_cron_job(self):
         for config in self:
             _logger.info(f"RKSV: Creating/updating cron job for POS config '{config.name}' (ID: {config.id}).")
@@ -251,68 +315,7 @@ class CustomPOSConfig(models.Model):
             })
 
     def _cron_create_monthly_receipt(self):
-        if not self.exists() or not self.pos_use_registrierkasse:
-            _logger.warning(f"RKSV CRON: Attempted to run for non-existent or non-RKSV POS config (ID: {self.id}). Aborting.")
-            return
-
-        _logger.info(f"RKSV CRON: Processing POS Config '{self.name}' (ID: {self.id})")
-        pos_session = None
-        try:
-            # Step 1: Create Session & Order
-            pos_session = self._rksv_create_pos_session(self, _("Monthly Null Receipt Session"))
-            receipt_num = int(self.receipt_sequence_id.next_by_id())
-            order_date_obj = fields.Datetime.now()
-
-            prev_rksv_order = self.env['pos.order'].search([
-                ('config_id', '=', self.id),
-                ('registrierkasse_receipt_number', '=', int(receipt_num) - 1),
-                ('state', 'in', ['paid', 'done', 'invoiced'])
-            ], limit=1, order='registrierkasse_receipt_number desc, id desc')
-            prev_order_jws_hash_for_chaining = chain_hash(prev_rksv_order)
-
-            order_sequence_in_session = self.env['pos.order'].search_count([('session_id', '=', pos_session.id)]) + 1
-
-            order = self._rksv_create_null_order(
-                self, pos_session, receipt_num, order_date_obj,
-                prev_order_jws_hash_for_chaining, order_sequence_in_session, _('RKSV Null receipt'))
-            order.action_pos_order_paid()
-
-            # Step 2: Perform RKSV Signing
-            self._rksv_perform_order_signing(
-                self, order,
-                self.revenue_counter,  # Prospective revenue for encryption
-                prev_order_jws_hash_for_chaining  # Previous hash for JWS payload
-            )
-            _logger.info(
-                f"RKSV CRON: Monthly receipt (Order ID: {order.id}) for POS '{self.name}' signed.")
-
-            # Step 3: If it's the end of the year, send the Jahresbeleg to FinanzOnline
-            today = fields.Date.today()
-            if today.month == 12 and self.env['ir.config_parameter'].get_param('pos_registrierkasse.fon_active'):
-                _logger.info(f"RKSV CRON: Jahresbeleg for '{self.name}'. Sending to FinanzOnline.")
-                credentials = self._get_finanz_online_credentials()
-                try:
-                    with FinanzOnlineClient(credentials) as client:
-                        _logger.info(f"RKSV CRON: Verifying Jahresbeleg for '{self.name}' with FinanzOnline.")
-                        if client.verify_receipt(
-                            customer_info=self.company_id.name,
-                            receipt_data=order.machine_readable_code + "_" + base64url_to_base64(order.order_signature),
-                            transmission_type='T' if credentials.env == 'test' else 'P'
-                        ):
-                            _logger.info(f"RKSV CRON: Jahresbeleg for '{self.name}' sent successfully to FinanzOnline.")
-                        else:
-                            _logger.error(f"RKSV CRON: Failed to send Jahresbeleg for '{self.name}' to FinanzOnline.")
-                except Exception as e:
-                    _logger.error(f"RKSV CRON: Error sending Jahresbeleg for '{self.name}' to FinanzOnline: {e}", exc_info=True)
-
-        except Exception as e:
-            _logger.error(f"RKSV CRON: Error processing POS Config '{self.name}': {e}", exc_info=True)
-        finally:
-            if (pos_session and pos_session.exists()
-                    and pos_session.opening_notes == _("Monthly Null Receipt Session")
-                    and pos_session.state != 'closed'):
-                pos_session.write({'state': 'closed', 'stop_at': fields.Datetime.now()})
-                _logger.info(f"RKSV CRON: Closed POS Session (ID: {pos_session.id})")
+        self.create_null_receipt(_('Monthly RKSV Null Receipt'), fon_submit=fields.Date.today().month == 12)
 
     @api.model
     def write(self, vals):
@@ -374,7 +377,7 @@ class CustomPOSConfig(models.Model):
 
     def _rksv_create_null_order(self, pos_config_rec, pos_session, receipt_num, order_date_obj,
                                 prev_signature_hash_for_order_field, order_sequence_in_session,
-                                pos_reference):
+                                general_note):
         """Helper to create a null POS order for RKSV."""
         order = self.env['pos.order'].create({
             'date_order': order_date_obj,
@@ -386,8 +389,8 @@ class CustomPOSConfig(models.Model):
             'registrierkasse_receipt_number': receipt_num,
             'certificate_serial_number': pos_config_rec.certificate_serial_number,
             'prev_order_signature': prev_signature_hash_for_order_field,
-            'pos_reference': f"{pos_reference} {pos_session.id:05d}-{order_sequence_in_session:03d}-{int(receipt_num):04d}",
-            'general_note': _("Automatic Null Receipt booking from RKSV"),
+            'pos_reference': f"{_('RKSV Null Receipt')} {pos_session.id:05d}-{order_sequence_in_session:03d}-{int(receipt_num):04d}",
+            'general_note': general_note,
             'state': 'done'
         })
         _logger.info(f"RKSV: Created POS Order (ID: {order.id}, Name: {order.name}) with number {receipt_num}.")

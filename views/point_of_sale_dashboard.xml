@@ -12,6 +12,7 @@
                                 <span>RKSV</span>
                             </h5>
                             <div role="menuitem">
+                                <a name="%(action_create_nullreceipt)d" string="Create Null Receipt" type="action"/>
                                 <a name="action_download_daten_erfassungs_protokoll" type="object" string="Data Recording Protocol"/>
                             </div>
                         </div>

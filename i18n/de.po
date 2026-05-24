@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-23 18:59+0000\n"
-"PO-Revision-Date: 2026-05-23 20:59+0200\n"
+"POT-Creation-Date: 2026-05-24 09:18+0000\n"
+"PO-Revision-Date: 2026-05-24 11:19+0200\n"
 "Last-Translator: Manuel Faux <mfaux@conf.at>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -99,10 +99,9 @@ msgstr ""
 "gelöscht werden. Bitte erstellen Sie stattdessen eine Erstattung."
 
 #. module: pos_registrierkasse
-#. odoo-python
-#: code:addons/pos_registrierkasse/models/pos_config.py:0
-msgid "Automatic Null Receipt booking from RKSV"
-msgstr "Automatische Nullbeleg Buchung der Registrierkasse"
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.pos_create_null_receipt_wizard
+msgid "Cancel"
+msgstr "Abbrechen"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_order__rksv_state__cancel
@@ -129,6 +128,33 @@ msgstr ""
 "Registrierkasse“ nicht zulässig"
 
 #. module: pos_registrierkasse
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.pos_create_null_receipt_wizard
+msgid "Create"
+msgstr "Erstellen"
+
+#. module: pos_registrierkasse
+#: model:ir.actions.act_window,name:pos_registrierkasse.action_create_nullreceipt
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.pos_create_null_receipt_wizard
+#: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
+msgid "Create Null Receipt"
+msgstr "Nullbeleg erstellen"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_nullreceipt_wizard__create_uid
+msgid "Created by"
+msgstr "Erstellt von"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_nullreceipt_wizard__create_date
+msgid "Created on"
+msgstr "Erstellt am"
+
+#. module: pos_registrierkasse
+#: model:ir.model,name:pos_registrierkasse.model_pos_nullreceipt_wizard
+msgid "Creates a null receipt in the RSKV register"
+msgstr "Erstellt einen Nullbeleg für diese Kasse"
+
+#. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
 msgid ""
 "Credentials for the Austrian FinanzOnline web service. These settings are "
@@ -141,6 +167,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_kanban_extension
 msgid "Data Recording Protocol"
 msgstr "Datenerfassungsprotokoll"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_nullreceipt_wizard__description
+msgid "Description"
+msgstr "Beschreibung"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_nullreceipt_wizard__display_name
+msgid "Display Name"
+msgstr "Anzeigename"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__pos_use_registrierkasse
@@ -199,6 +235,11 @@ msgid "Global Settings"
 msgstr "Globale Einstellungen"
 
 #. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_nullreceipt_wizard__id
+msgid "ID"
+msgstr "ID"
+
+#. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__pos_rksv_lock
 msgid "If this lock is set, RKSV settings can not be changed"
 msgstr "RKSV Einstellungen gesperrt"
@@ -213,6 +254,16 @@ msgstr "Umsatzzähler"
 #: code:addons/pos_registrierkasse/static/src/overrides/pos_receipt_extension.xml:0
 msgid "Kassenidentifikationsnummer:"
 msgstr "Kassenidentifikationsnummer:"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_nullreceipt_wizard__write_uid
+msgid "Last Updated by"
+msgstr "Zuletzt geändert von"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_nullreceipt_wizard__write_date
+msgid "Last Updated on"
+msgstr "Zuletzt geändert am"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_order__machine_readable_code
@@ -236,6 +287,12 @@ msgid "Monthly Null Receipt Session"
 msgstr "Monatliche Nullbeleg Sitzung"
 
 #. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid "Monthly RKSV Null Receipt"
+msgstr "Monatlicher RKSV Nullbeleg"
+
+#. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
 msgid "Not Signed"
 msgstr "Nicht signiert"
@@ -244,6 +301,18 @@ msgstr "Nicht signiert"
 #: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_order__rksv_state__not_signed
 msgid "Not signed"
 msgstr "Nicht signiert"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_config.py:0
+msgid "Null Receipt Session"
+msgstr "Monatliche Nullbeleg Sitzung"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/wizard/pos_create_null_receipt.py:0
+msgid "Null receipt could not be created."
+msgstr "Nullbeleg konnte nicht erstellt werden."
 
 #. module: pos_registrierkasse
 #. odoo-python
@@ -259,7 +328,7 @@ msgstr "Teilnehmer-ID"
 #. module: pos_registrierkasse
 #: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_order__rksv_state__pending
 msgid "Pending"
-msgstr "In Bearbeitung"
+msgstr "Wartend"
 
 #. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.res_config_settings_view_form
@@ -268,6 +337,7 @@ msgstr "Pin"
 
 #. module: pos_registrierkasse
 #: model:ir.model,name:pos_registrierkasse.model_pos_config
+#: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_nullreceipt_wizard__config_id
 msgid "Point of Sale Configuration"
 msgstr "Point of Sale Konfiguration"
 
@@ -288,6 +358,11 @@ msgid "Production Environment"
 msgstr "Produktionsumgebung"
 
 #. module: pos_registrierkasse
+#: model:ir.model.fields,help:pos_registrierkasse.field_pos_nullreceipt_wizard__description
+msgid "Provide a reason for the null receipt."
+msgstr "Grund für die Erstellung eines Nullbelegs."
+
+#. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
 msgid "RKSV Compliance"
 msgstr "RKSV Konformität"
@@ -295,14 +370,14 @@ msgstr "RKSV Konformität"
 #. module: pos_registrierkasse
 #. odoo-python
 #: code:addons/pos_registrierkasse/models/pos_config.py:0
-msgid "RKSV Null receipt"
-msgstr "RKSV Nullsteuer (0%)"
+msgid "RKSV Null Receipt"
+msgstr "RKSV Nullbeleg"
 
 #. module: pos_registrierkasse
 #. odoo-python
 #: code:addons/pos_registrierkasse/models/pos_config.py:0
-msgid "RKSV Opening receipt"
-msgstr "Startbeleg nach RKSV"
+msgid "RKSV Opening Receipt"
+msgstr "RKSV Startbeleg"
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_config__display_revenue_counter
@@ -358,7 +433,7 @@ msgstr "Belegnummernkreis"
 #: model:ir.actions.server,name:pos_registrierkasse.retry_signing
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_order_form_registrierkasse
 msgid "Retry Signing"
-msgstr "Signatur erneut versuchen"
+msgstr "Signieren erneut versuchen"
 
 #. module: pos_registrierkasse
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
@@ -433,6 +508,21 @@ msgstr "Testumgebung"
 #: model:ir.model.constraint,message:pos_registrierkasse.constraint_pos_config_unique_name
 msgid "The name of the POS must be unique!"
 msgstr "Der Name des POS muss eindeutig sein!"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/wizard/pos_create_null_receipt.py:0
+msgid "This function is only available for PoS with enabled RKSV."
+msgstr ""
+"Diese Funktion ist nur für Kassensysteme mit aktiver RKSV Registrierkasse "
+"verfügbar."
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_order.py:0
+msgid "This order was created before activating RKSV."
+msgstr ""
+"Dieser Auftrag wurde vor der Aktivierung der RKSV Registrierkasse erstellt."
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields,help:pos_registrierkasse.field_pos_config__receipt_sequence_id
@@ -523,6 +613,12 @@ msgstr "Zertifizierungsstellen"
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_config_form_extension
 msgid "e.g. NYC Shop"
 msgstr "z.B. NYC Shop"
+
+#~ msgid "Null Receipt"
+#~ msgstr "Nullbeleg"
+
+#~ msgid "Automatic Null Receipt booking from RKSV"
+#~ msgstr "Automatische Nullbeleg Buchung der Registrierkasse"
 
 #~ msgid ""
 #~ "Eine bereits mit der Registrierkasse (RKSV) signierte Bestellung kann "
