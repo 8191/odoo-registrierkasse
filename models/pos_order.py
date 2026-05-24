@@ -31,7 +31,7 @@ class CustomPOSOrder(models.Model):
 
     rksv_state = fields.Selection(
         [('pending', 'Pending'), ('signed', 'Signed'), ('not_signed', 'Not signed'), ('cancel', 'Cancelled')],
-        'RKSV Status', readonly=True, copy=False, compute='_compute_rksv_state', store=True)
+        'RKSV Status', readonly=True, copy=False, compute='_compute_rksv_state', store=True, index=True)
 
     @api.depends('lines.refunded_qty', 'lines.qty')
     def _compute_has_refundable_lines(self):
@@ -250,6 +250,10 @@ class CustomPOSOrder(models.Model):
 
     def action_retry_signing(self):
         """Manually retry signing the order."""
+        if not self and self.env.context.get('purpose') == 'view_unsigned_orders':
+            active_domain = self.env.context.get('active_domain')
+            if type(active_domain) is list:
+                self = self.search(active_domain)
         if len(self.config_id) > 1:
             raise UserError(_("Only orders from the same PoS can be signed simultaneously."))
         signed_orders = self.sign_order()

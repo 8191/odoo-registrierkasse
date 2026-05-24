@@ -27,6 +27,8 @@ class CustomPOSConfig(models.Model):
     registrierkasse_aes_key_checksum = fields.Char('Umsatzzähler AES Prüfsumme', compute="_calculate_aes_key_checksum")
     revenue_counter = fields.Integer(string='Internal Revenue Counter', default=0, copy=False)
     display_revenue_counter = fields.Float("RKSV Revenue Counter", compute="_display_revenue_counter")
+    unsigned_order_ids = fields.One2many('pos.order', 'config_id', string="Unsigned Orders",
+                                      domain=[('rksv_state', '=', 'not_signed')])
 
     a_trust_user_name = fields.Char(string='A-Trust User Name')
     a_trust_password = fields.Char(string='A-Trust Password')
@@ -113,10 +115,11 @@ class CustomPOSConfig(models.Model):
         if not pos_config_rec.receipt_sequence_id:
             pos_config_rec.receipt_sequence_id = self._create_sequence(pos_config_rec)
 
-        if not pos_config_rec.a_trust_user_name:
-            raise UserError("You need to specify a A-Trust user for a RKSV compliant POS")
-        if not pos_config_rec.a_trust_password:
-            raise UserError("You need to specify a A-Trust password for a RKSV compliant POS")
+        if pos_config_rec.a_trust_environment != 'test':
+            if not pos_config_rec.a_trust_user_name:
+                raise UserError(_("You need to specify a A-Trust user for a RKSV compliant POS"))
+            if not pos_config_rec.a_trust_password:
+                raise UserError(_("You need to specify a A-Trust password for a RKSV compliant POS"))
 
         # Step 1: A-Trust Login & Certificate Info (Specific to starting receipt setup)
         try:
@@ -362,6 +365,17 @@ class CustomPOSConfig(models.Model):
             'res_model': 'pos.nullreceipt.wizard',
             'view_mode': 'form',
             'target': 'new',
+        }
+
+    def action_view_unsigned_orders(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Unsigned Orders of %s", self.name),
+            'res_model': 'pos.order',
+            'view_mode': 'list',
+            'domain': [('rksv_state', '=', 'not_signed'), ('config_id', '=', self.id)],
+            'context': {'purpose': 'view_unsigned_orders'},
         }
 
     def _rksv_create_pos_session(self, pos_config_rec, opening_notes):

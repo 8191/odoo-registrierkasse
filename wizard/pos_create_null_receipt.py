@@ -7,17 +7,18 @@ class PosCreateNullReceiptWizard(models.TransientModel):
     _description = 'Creates a null receipt in the RSKV register'
 
     def _default_config(self):
+        active_id = self.env.context.get('active_id')
         match self.env.context.get('active_model'):
-            case 'pos.order':
-                order_id = self.env.context.get('active_id')
-                if order_id:
-                    order = self.env['pos.order'].browse(order_id)
-                    if order.exists() and order.config_id:
-                        return order.config_id
-            case 'pos.config':
-                config_id = self.env.context.get('active_id')
-                if config_id:
-                    return self.env['pos.config'].browse(config_id)
+            case 'pos.order' if active_id:
+                order = self.env['pos.order'].browse(active_id)
+                if order.exists() and order.config_id:
+                    return order.config_id
+            case 'pos.config' if active_id:
+                return self.env['pos.config'].browse(active_id)
+            case 'pos.order' if order_ids := self.env.context.get('signed_order_ids'):
+                order = self.env['pos.order'].browse(order_ids[0])
+                if order.exists() and order.config_id:
+                    return order.config_id
         return False
 
     def _default_description(self):
