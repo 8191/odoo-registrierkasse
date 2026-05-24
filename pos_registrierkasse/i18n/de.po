@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-24 19:23+0000\n"
-"PO-Revision-Date: 2026-05-24 21:27+0200\n"
+"POT-Creation-Date: 2026-05-24 22:10+0000\n"
+"PO-Revision-Date: 2026-05-25 01:07+0200\n"
 "Last-Translator: Manuel Faux <mfaux@conf.at>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -112,6 +112,12 @@ msgstr "Abgebrochen"
 #: model_terms:ir.ui.view,arch_db:pos_registrierkasse.view_pos_pos_form_registrierkasse
 msgid "Cash Register"
 msgstr "Registrierkasse"
+
+#. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/wizard/pos_create_null_receipt.py:0
+msgid "Collective null receipt for following orders"
+msgstr "Nullbeleg über folgende Aufträge"
 
 #. module: pos_registrierkasse
 #: model:ir.model,name:pos_registrierkasse.model_res_config_settings
@@ -536,10 +542,25 @@ msgid "Supplier ID"
 msgstr "Hersteller-ID"
 
 #. module: pos_registrierkasse
-#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_config__a_trust_environment__test
+#. odoo-python
+#: code:addons/pos_registrierkasse/wizard/pos_create_null_receipt.py:0
+msgid "Temporary malfunction of the safety device has been resolved."
+msgstr "Vorübergehender Ausfall der Sicherheitseinrichtung behoben"
+
+#. module: pos_registrierkasse
 #: model:ir.model.fields.selection,name:pos_registrierkasse.selection__res_config_settings__fon_environment__test
 msgid "Test Environment"
 msgstr "Testumgebung"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_config__a_trust_environment__test_fail
+msgid "Test Environment (failing)"
+msgstr "Testumgebung (Fehlersimulation)"
+
+#. module: pos_registrierkasse
+#: model:ir.model.fields.selection,name:pos_registrierkasse.selection__pos_config__a_trust_environment__test
+msgid "Test Environment (success)"
+msgstr "Testumgebung (Erfolgsimulation)"
 
 #. module: pos_registrierkasse
 #: model:ir.model.constraint,message:pos_registrierkasse.constraint_pos_config_unique_name

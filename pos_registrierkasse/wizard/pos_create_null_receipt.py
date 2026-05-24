@@ -1,5 +1,5 @@
 from odoo import fields, models, _
-from odoo.api import UserError
+from odoo.exceptions import UserError
 
 
 class PosCreateNullReceiptWizard(models.TransientModel):
@@ -22,10 +22,10 @@ class PosCreateNullReceiptWizard(models.TransientModel):
         return False
 
     def _default_description(self):
-        description = "Temporary malfunction of the safety device has been resolved."
+        description = _("Temporary malfunction of the safety device has been resolved.")
         if self.env.context.get('active_model') == "pos.order" and self.env.context.get('signed_order_ids'):
             orders = self.env['pos.order'].browse(self.env.context.get('signed_order_ids'))
-            description += "\n\nCollective null receipt for following orders:\n" + "\n".join(o.pos_reference for o in orders)
+            description += f"\n\n{_('Collective null receipt for following orders')}:\n" + "\n".join(o.pos_reference for o in orders)
         return description
 
     config_id = fields.Many2one('pos.config', string='Point of Sale Configuration', required=True, default=_default_config)
