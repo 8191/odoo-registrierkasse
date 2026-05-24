@@ -158,11 +158,13 @@ class ATrustMockProvider(ATrustProvider):
 
 
 def get_atrust_api(env):
-    if env == 'test':
-        return ATrustMockProvider()
-    elif env == 'qa':
-        return ATrustProdProvider("https://hs-abnahme.a-trust.at/asignrkonline/v2")
-    return ATrustProdProvider("https://rksv.a-trust.at/asignrkonline/v2")
+    match env:
+        case 'test':
+            return ATrustMockProvider()
+        case 'qa':
+            return ATrustProdProvider("https://hs-abnahme.a-trust.at/asignrkonline/v2")
+        case _:
+            return ATrustProdProvider("https://rksv.a-trust.at/asignrkonline/v2")
 
 
 class PosUtilsTest(unittest.TestCase):
