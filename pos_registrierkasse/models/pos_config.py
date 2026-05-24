@@ -44,7 +44,7 @@ class CustomPOSConfig(models.Model):
     monthly_nullbeleg_time = fields.Float(string='Time for Nullbeleg', default=21.0)
 
     a_trust_environment = fields.Selection(
-        [('test', 'Test Environment'), ('production', 'Production Environment'),('qa','A-Trust Abnahme Environment')],
+        [('test', 'Test Environment (success)'), ('test_fail', 'Test Environment (failing)'), ('production', 'Production Environment'), ('qa','A-Trust Abnahme Environment')],
         string='A-Trust Environment',
         default='production'
     )
