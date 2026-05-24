@@ -190,6 +190,7 @@ class CustomPOSOrder(models.Model):
         return self._get_rksv_signature(session.config_id, order_data_dict, is_refund=is_refund)
 
     def sign_order(self):
+        signed_orders = self.env['pos.order']
         self = self.sorted(key='date_order')
         for order in self:
             if order.rksv_state not in {'not_signed', 'pending'}:
@@ -221,8 +222,12 @@ class CustomPOSOrder(models.Model):
             try:
                 rksv_data = self._get_rksv_signature(order.session_id.config_id, order_vals, is_refund=is_refund)
                 order.write(order_vals | rksv_data)
+                order.message_post(body=_("Security device failed at time of payment. RKSV signature was added delayed and order date was changed accordingly."),
+                                   message_type='comment')
+                signed_orders |= order
             except Exception as e:
                 raise UserError(_("Signing failed: %s") % str(e))
+        return signed_orders
 
     @api.model
     def _process_order(self, *args, **kwargs):
@@ -245,4 +250,12 @@ class CustomPOSOrder(models.Model):
 
     def action_retry_signing(self):
         """Manually retry signing the order."""
-        self.sign_order()
+        if len(self.config_id) > 1:
+            raise UserError(_("Only orders from the same PoS can be signed simultaneously."))
+        signed_orders = self.sign_order()
+        if signed_orders:
+            action = self.config_id.action_create_nullreceipt()
+            action['context'] = {
+                'signed_order_ids': signed_orders.ids
+            }
+            return action
