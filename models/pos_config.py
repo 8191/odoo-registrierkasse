@@ -93,6 +93,7 @@ class CustomPOSConfig(models.Model):
         })
         return sequence
 
+    @api.depends('revenue_counter')
     def _display_revenue_counter(self):
         for record in self:
             record.display_revenue_counter = record.revenue_counter / 100.0
@@ -145,7 +146,7 @@ class CustomPOSConfig(models.Model):
 
         order = self._rksv_create_null_order(
             pos_config_rec, pos_session, receipt_num, order_date_obj,
-            initial_prev_order_sig_hash, 1, _('RKSV Opening receipt'))
+            initial_prev_order_sig_hash, 1, _('RKSV Opening Receipt'))
         order.action_pos_order_paid()
 
         # Step 3: Perform RKSV Signing
@@ -335,6 +336,7 @@ class CustomPOSConfig(models.Model):
             elif not record.pos_use_registrierkasse:  # Clear keys if RKSV is turned off
                 record.registrierkasse_aes_key = False
 
+    @api.depends('pos_use_registrierkasse', 'registrierkasse_aes_key')
     def _calculate_aes_key_checksum(self):
         for record in self:
             if record.pos_use_registrierkasse and record.registrierkasse_aes_key:
