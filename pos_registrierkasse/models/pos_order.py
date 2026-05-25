@@ -4,9 +4,9 @@ from odoo import api, models, fields, _
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
 
-from .libs.a_trust.a_trust_library import SessionData, OrderData, LoginData
-from .utils.order_utils import chain_hash, format_order_date
-from .utils.revenue_counter import encrypt_revenue_counter
+from odoo.addons.pos_registrierkasse.lib import a_trust
+from odoo.addons.pos_registrierkasse.utils.order_utils import chain_hash, format_order_date
+from odoo.addons.pos_registrierkasse.utils.revenue_counter import encrypt_revenue_counter
 
 
 _logger = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class CustomPOSOrder(models.Model):
                 + order_vals.get("sum_vat_special", 0.0) * 100.0
             )
         else:
-            raise UserError(_("Singing failed. This order was probably created before activating RKSV."))
+            raise UserError(_("Signing failed. This order was probably created before activating RKSV."))
 
         receipt_number = int(config.receipt_sequence_id.next_by_id())
 
@@ -102,7 +102,7 @@ class CustomPOSOrder(models.Model):
 
         prev_order_signature = chain_hash(prev_order)
 
-        machine_readable_code = OrderData(
+        machine_readable_code = a_trust.OrderData(
             config.name,
             str(receipt_number),
             format_order_date(date_order_str),
@@ -118,16 +118,16 @@ class CustomPOSOrder(models.Model):
 
         try:
             atrust_api = config.get_atrust_provider()
-            a_trust_session_data_obj = SessionData(config.a_trust_session_key, config.a_trust_session_id)
+            a_trust_session_data_obj = a_trust.SessionData(config.a_trust_session_key, config.a_trust_session_id)
             order_signature = atrust_api.create_signature(a_trust_session_data_obj, machine_readable_code)
         except PermissionError:
             atrust_api = config.get_atrust_provider()
-            a_trust_login_session = atrust_api.login(LoginData(config.a_trust_user_name, config.a_trust_password))
+            a_trust_login_session = atrust_api.login(a_trust.LoginData(config.a_trust_user_name, config.a_trust_password))
             config.write({
                 'a_trust_session_key': a_trust_login_session.sessionKey,
                 'a_trust_session_id': a_trust_login_session.sessionId
             })
-            a_trust_session_data_obj_retry = SessionData(a_trust_login_session.sessionKey,
+            a_trust_session_data_obj_retry = a_trust.SessionData(a_trust_login_session.sessionKey,
                                                          a_trust_login_session.sessionId)
             order_signature = atrust_api.create_signature(a_trust_session_data_obj_retry, machine_readable_code)
 

@@ -1,15 +1,15 @@
+from datetime import timedelta
 import json
 import logging
+import pytz
+
 from odoo import _, api, models, fields
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
-from datetime import timedelta
-import pytz
 
-from .libs.a_trust.a_trust_library import SessionData, OrderData, LoginData, get_atrust_api
-from .libs.finanz_online.finanz_online_library import FinanzOnlineClient, FinanzOnlineCredentials
-from .utils.order_utils import chain_hash, hash_signature, format_order_date, base64url_to_base64
-from .utils.revenue_counter import encrypt_revenue_counter, generate_aes_key, generate_aes_checksum
+from odoo.addons.pos_registrierkasse.lib import a_trust
+from odoo.addons.pos_registrierkasse.lib.finanz_online.finanz_online_library import FinanzOnlineClient, FinanzOnlineCredentials
+from odoo.addons.pos_registrierkasse.utils import order_utils, revenue_counter
 
 _logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class CustomPOSConfig(models.Model):
     )
 
     def get_atrust_provider(self):
-        return get_atrust_api(self.a_trust_environment)
+        return a_trust.get_atrust_api(self.a_trust_environment)
 
     def _get_finanz_online_credentials(self):
         get_param = self.env['ir.config_parameter'].get_param
@@ -131,7 +131,7 @@ class CustomPOSConfig(models.Model):
             _logger.info(f"RKSV: Attempting A-Trust login for POS '{pos_config_rec.name}'.")
             atrust_api = pos_config_rec.get_atrust_provider()
             a_trust_api_session = atrust_api.login(
-                LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password))
+                a_trust.LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password))
             signature_cert_info = atrust_api.get_certificate_information(pos_config_rec.a_trust_user_name)
             pos_config_rec.a_trust_session_id = a_trust_api_session.sessionId
             pos_config_rec.a_trust_session_key = a_trust_api_session.sessionKey
@@ -150,7 +150,7 @@ class CustomPOSConfig(models.Model):
         pos_session = self._rksv_create_pos_session(pos_config_rec, _("Starting Receipt Session"))
         receipt_num = int(pos_config_rec.receipt_sequence_id.next_by_id())
         order_date_obj = fields.Datetime.now()
-        initial_prev_order_sig_hash = hash_signature(pos_config_rec.name)  # Special for first receipt
+        initial_prev_order_sig_hash = order_utils.hash_signature(pos_config_rec.name)  # Special for first receipt
 
         order = self._rksv_create_null_order(
             pos_config_rec, pos_session, receipt_num, order_date_obj,
@@ -207,7 +207,7 @@ class CustomPOSConfig(models.Model):
                 _logger.info(f"RKSV: Verifying starting receipt for '{pos_config_rec.name}' with FinanzOnline.")
                 client.verify_receipt(
                     customer_info=pos_config_rec.company_id.name,
-                    receipt_data=order.machine_readable_code + "_" + base64url_to_base64(order.order_signature),
+                    receipt_data=order.machine_readable_code + "_" + order_utils.base64url_to_base64(order.order_signature),
                     transmission_type='T' if credentials.env == 'test' else 'P'
                 )
                 _logger.info(f"RKSV: Starting receipt for '{pos_config_rec.name}' verified successfully.")
@@ -237,7 +237,7 @@ class CustomPOSConfig(models.Model):
                 ('registrierkasse_receipt_number', '=', int(receipt_num) - 1),
                 ('state', 'in', ['paid', 'done', 'invoiced'])
             ], limit=1, order='registrierkasse_receipt_number desc, id desc')
-            prev_order_jws_hash_for_chaining = chain_hash(prev_rksv_order)
+            prev_order_jws_hash_for_chaining = order_utils.chain_hash(prev_rksv_order)
 
             order_sequence_in_session = self.env['pos.order'].search_count([('session_id', '=', pos_session.id)]) + 1
 
@@ -264,7 +264,7 @@ class CustomPOSConfig(models.Model):
                         _logger.info(f"RKSV: Verifying Jahresbeleg for '{self.name}' with FinanzOnline.")
                         if client.verify_receipt(
                             customer_info=self.company_id.name,
-                            receipt_data=order.machine_readable_code + "_" + base64url_to_base64(order.order_signature),
+                            receipt_data=order.machine_readable_code + "_" + order_utils.base64url_to_base64(order.order_signature),
                             transmission_type='T' if credentials.env == 'test' else 'P'
                         ):
                             _logger.info(f"RKSV: Jahresbeleg for '{self.name}' sent successfully to FinanzOnline.")
@@ -342,7 +342,7 @@ class CustomPOSConfig(models.Model):
     def generate_aes_key(self):
         for record in self:
             if record.pos_use_registrierkasse and not record.registrierkasse_aes_key:  # only if RKSV is true AND key is missing
-                record.registrierkasse_aes_key = generate_aes_key()
+                record.registrierkasse_aes_key = revenue_counter.generate_aes_key()
             elif not record.pos_use_registrierkasse:  # Clear keys if RKSV is turned off
                 record.registrierkasse_aes_key = False
 
@@ -350,7 +350,7 @@ class CustomPOSConfig(models.Model):
     def _calculate_aes_key_checksum(self):
         for record in self:
             if record.pos_use_registrierkasse and record.registrierkasse_aes_key:
-                record.registrierkasse_aes_key_checksum = generate_aes_checksum(record.registrierkasse_aes_key)
+                record.registrierkasse_aes_key_checksum = revenue_counter.generate_aes_checksum(record.registrierkasse_aes_key)
             else:
                 record.registrierkasse_aes_key_checksum = False
 
@@ -452,19 +452,19 @@ class CustomPOSConfig(models.Model):
         """
         _logger.info(
             f"RKSV: Performing signature for Order ID {order_rec.id}, Receipt {order_rec.registrierkasse_receipt_number}")
-        encrypted_revenue_val = encrypt_revenue_counter(
+        encrypted_revenue_val = revenue_counter.encrypt_revenue_counter(
             prospective_revenue_for_encryption,
             pos_config_rec.registrierkasse_aes_key,
             pos_config_rec.name,
             order_rec.registrierkasse_receipt_number  # Use number from the order
         )
 
-        a_trust_session_for_signing = SessionData(pos_config_rec.a_trust_session_key, pos_config_rec.a_trust_session_id)
+        a_trust_session_for_signing = a_trust.SessionData(pos_config_rec.a_trust_session_key, pos_config_rec.a_trust_session_id)
 
-        machine_readable_code = OrderData(
+        machine_readable_code = a_trust.OrderData(
             pos_config_rec.name,
             order_rec.registrierkasse_receipt_number,
-            format_order_date(str(order_rec.date_order)),
+            order_utils.format_order_date(str(order_rec.date_order)),
             0, 0, 0, 0, 0,  # VAT sums are all 0 for null receipts
             encrypted_revenue_val,
             pos_config_rec.certificate_serial_number,
@@ -479,10 +479,10 @@ class CustomPOSConfig(models.Model):
             _logger.warning(f"RKSV: A-Trust re-login needed during signing for POS '{pos_config_rec.name}'.")
             atrust_api = pos_config_rec.get_atrust_provider()
             a_trust_api_session_retry = atrust_api.login(
-                LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password))
+                a_trust.LoginData(pos_config_rec.a_trust_user_name, pos_config_rec.a_trust_password))
             pos_config_rec.a_trust_session_key = a_trust_api_session_retry.sessionKey
             pos_config_rec.a_trust_session_id = a_trust_api_session_retry.sessionId
-            a_trust_session_for_signing_retry = SessionData(a_trust_api_session_retry.sessionKey,
+            a_trust_session_for_signing_retry = a_trust.SessionData(a_trust_api_session_retry.sessionKey,
                                                             a_trust_api_session_retry.sessionId)
             actual_jws_signature = atrust_api.create_signature(a_trust_session_for_signing_retry, machine_readable_code)
         except Exception as e:
