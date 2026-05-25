@@ -156,20 +156,19 @@ class CustomPOSOrder(models.Model):
         #####
         for line in lines:
             price = line.price_subtotal_incl
-            if line.tax_ids:
-                match line.tax_ids[0].amount:
-                    case 20:
-                        sums['sum_vat_normal'] += price
-                    case 10:
-                        sums['sum_vat_discounted_1'] += price
-                    case 13:
-                        sums['sum_vat_discounted_2'] += price
-                    case 0 if not line.reward_id or line.reward_id.program_id.program_type not in {'gift_card', 'ewallet'}:
+            match line.tax_ids[0].amount if line.tax_ids else 0:
+                case 20:
+                    sums['sum_vat_normal'] += price
+                case 10:
+                    sums['sum_vat_discounted_1'] += price
+                case 13:
+                    sums['sum_vat_discounted_2'] += price
+                case 0:
+                    # Gift cards should be ignored for the purpose of the RKSV
+                    if not line.reward_id or line.reward_id.program_id.program_type not in {'gift_card', 'ewallet'}:
                         sums['sum_vat_null'] += price
-                    case _:
-                        sums['sum_vat_special'] += price
-            else:
-                sums['sum_vat_null'] += price
+                case _:
+                    sums['sum_vat_special'] += price
         return sums
 
     @api.model
