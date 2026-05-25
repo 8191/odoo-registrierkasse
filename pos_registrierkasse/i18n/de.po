@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-24 22:10+0000\n"
-"PO-Revision-Date: 2026-05-25 01:07+0200\n"
+"POT-Creation-Date: 2026-05-25 09:17+0000\n"
+"PO-Revision-Date: 2026-05-25 11:18+0200\n"
 "Last-Translator: Manuel Faux <mfaux@conf.at>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -344,6 +344,12 @@ msgid "Pin"
 msgstr "Pin"
 
 #. module: pos_registrierkasse
+#. odoo-python
+#: code:addons/pos_registrierkasse/models/pos_order.py:0
+msgid "Please close related sessions of PoS '%s' before."
+msgstr "Bitte schließen Sie zuvor alle zugehörigen Sitzungen der Kasse „%s“."
+
+#. module: pos_registrierkasse
 #: model:ir.model,name:pos_registrierkasse.model_pos_config
 #: model:ir.model.fields,field_description:pos_registrierkasse.field_pos_nullreceipt_wizard__config_id
 msgid "Point of Sale Configuration"
@@ -519,16 +525,16 @@ msgstr "Signiert"
 #. module: pos_registrierkasse
 #. odoo-python
 #: code:addons/pos_registrierkasse/models/pos_order.py:0
-msgid "Signing failed: %s"
-msgstr "Signierung fehlgeschlagen: %s"
+msgid "Signing failed. This order was probably created before activating RKSV."
+msgstr ""
+"Signieren Fehlgeschlagen. Dieser Auftrag wurde möglicherweise vor der "
+"Aktivierung der RKSV Registrierkasse erstellt."
 
 #. module: pos_registrierkasse
 #. odoo-python
 #: code:addons/pos_registrierkasse/models/pos_order.py:0
-msgid "Singing failed. This order was probably created before activating RKSV."
-msgstr ""
-"Signieren Fehlgeschlagen. Dieser Auftrag wurde möglicherweise vor der "
-"Aktivierung der RKSV Registrierkasse erstellt."
+msgid "Signing failed: %s"
+msgstr "Signierung fehlgeschlagen: %s"
 
 #. module: pos_registrierkasse
 #. odoo-python
@@ -545,7 +551,7 @@ msgstr "Hersteller-ID"
 #. odoo-python
 #: code:addons/pos_registrierkasse/wizard/pos_create_null_receipt.py:0
 msgid "Temporary malfunction of the safety device has been resolved."
-msgstr "Vorübergehender Ausfall der Sicherheitseinrichtung behoben"
+msgstr "Vorübergehender Ausfall der Sicherheitseinrichtung behoben."
 
 #. module: pos_registrierkasse
 #: model:ir.model.fields.selection,name:pos_registrierkasse.selection__res_config_settings__fon_environment__test
