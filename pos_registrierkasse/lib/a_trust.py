@@ -89,7 +89,7 @@ class ATrustProdProvider(ATrustProvider):
 
         response = put(url, json=request_payload)
         if response.status_code != 200:
-            raise Exception("Couldn't login to " + url)
+            raise Exception("Login to A-Trust failed.")
         response_payload = response.json()
         return SessionData(response_payload['sessionkey'], response_payload['sessionid'])
 
@@ -98,7 +98,7 @@ class ATrustProdProvider(ATrustProvider):
 
         response = delete(url)
         if response.status_code != 200:
-            raise Exception("Couldn't logout from " + url)
+            raise Exception("Logout from A-Trust failed.")
         return response
 
     def create_signature(self, session, machine_readable_code):
@@ -116,10 +116,10 @@ class ATrustProdProvider(ATrustProvider):
         response = post(url, json=payload)
 
         if response.status_code == 401:
-            raise PermissionError("Please log in ")
+            raise PermissionError("Invalid A-Trust credentials passed.")
 
         if response.status_code != 200:
-            raise Exception("got the following error from signature: " + str(response.status_code))
+            raise Exception("Received error from A-Trust: " + str(response.status_code))
         return response.json()['signature']
 
     def get_certificate_information(self, username):
@@ -127,10 +127,10 @@ class ATrustProdProvider(ATrustProvider):
         response = get(url)
 
         if response.status_code == 401:
-            raise PermissionError("Please log in ")
+            raise PermissionError("Invalid A-Trust credentials passed.")
 
         if response.status_code != 200:
-            raise Exception("got the following error from signature: " + str(response.status_code))
+            raise Exception("Received error from A-Trust: " + str(response.status_code))
         certificate = response.json()['Signaturzertifikate'][0]
         return CertificateInformation(certificate['ZertifikatsseriennummerHex'],
                                       certificate['Zertifikatsseriennummer'],
