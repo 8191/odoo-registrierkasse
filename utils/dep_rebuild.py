@@ -1,6 +1,6 @@
 from .order_utils import chain_hash, hash_signature, format_order_date
 from .revenue_counter import encrypt_revenue_counter
-from ..libs.a_trust.a_trust_library import SessionData, OrderData, LoginData
+from ..lib.a_trust import SessionData, OrderData, LoginData
 
 
 ### This script can be used to rebuild the Datenerfassungsprotokoll from scratch, if the encryption chain is broken.raise RedirectWarning(_('Warning message'), action_id, _('Button text'))

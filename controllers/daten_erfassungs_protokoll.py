@@ -4,7 +4,7 @@ import base64
 from odoo import http
 from odoo.http import request, content_disposition
 
-from odoo.addons.pos_registrierkasse.models.utils.order_utils import jws_signature_compact
+from odoo.addons.pos_registrierkasse.utils.order_utils import jws_signature_compact
 
 
 class DatenErfassungsProtokollController(http.Controller):
