@@ -192,7 +192,7 @@ class CustomPOSOrder(models.Model):
         signed_orders = self.env['pos.order']
         self = self.sorted(key='date_order')
         for order in self:
-            if order.rksv_state not in {'not_signed', 'pending'}:
+            if order.rksv_state != 'not_signed':
                 continue  # Signing not neccessary
             # Following checks are just safety guards - all these conditions should have a different rksv_state...
             if order.registrierkasse_receipt_number:
