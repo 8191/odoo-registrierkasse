@@ -71,4 +71,20 @@
             </filter>
         </field>
     </record>
+
+    <record id="view_pos_order_pivot_registrierkasse" model="ir.ui.view">
+        <field name="name">pos.order.pivot.registrierkasse</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_pivot"/>
+        <field name="arch" type="xml">
+            <xpath expr="//pivot" position="inside">
+                <field name="registrierkasse_receipt_number" invisible="1"/>
+                <field name="sum_vat_normal" invisible="1"/>
+                <field name="sum_vat_discounted_1" invisible="1"/>
+                <field name="sum_vat_discounted_2" invisible="1"/>
+                <field name="sum_vat_null" invisible="1"/>
+                <field name="sum_vat_special" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>
