@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Austrian Registered Cash Register",
-    'version': '18.0.1.0',
+    'version': '18.0.1.1',
     'category': 'Sales/Point Of Sale',
     'summary': "POS Extention to comply with Austrian Registrierkassenpflicht (RKSV)",
     'description': """
